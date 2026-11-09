@@ -1,0 +1,19 @@
+{
+  "packagedAt": "2026-11-09T15:32:02.1691634+09:00",
+  "naviHelper": "3.0.5",
+  "compileSdk": 35,
+  "minimumSdk": 33,
+  "buildType": "debug",
+  "artifacts": [
+    {
+      "file": "boss-fixture-debug.apk",
+      "bytes": 57415750,
+      "sha256": "741bac850379429c98ad48a97130b4b0491f27928f0777a40f84a596f996bf46"
+    },
+    {
+      "file": "boss-pleos-debug.apk",
+      "bytes": 57415714,
+      "sha256": "a822259c6b1bba5e58343bd77bca04f201ce1421208cd5159cb493729dbc8072"
+    }
+  ]
+}

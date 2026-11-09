@@ -1,0 +1,30 @@
+{
+  "suite": "dev.pleos.boss.game.GameTest",
+  "tests": 20,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "timestamp": "2026-11-07T01:32:18",
+  "testCases": [
+    "counterAtFiveAndTwentySeconds",
+    "sixtySecondsDealsSixtyHp",
+    "pityUsesChestGenerationNotOpeningOrder",
+    "processRecreationNeverCreditsElapsedTime",
+    "reverseAndStationaryNeverDamage",
+    "nonParkedMutationsFailWithoutChangingState",
+    "gameStateRoundTripsThroughJson",
+    "limitDropHasFiveSecondGrace",
+    "repeatedArrivalDoesNotAddSessionOrChest",
+    "staleSpeedAndStaleLimitBlockCombat",
+    "missingDataResetsOverspeedStreak",
+    "fasterWithinLimitDoesNotIncreaseDamage",
+    "hpCarriesBetweenTrips",
+    "missingLimitNeverAttacksOrCounters",
+    "duplicateTicksDoNotDuplicateRewards",
+    "knockedOutCannotRecoverWithinSameTrip",
+    "twoKillsAreAHardPerTripLimit",
+    "upgradeCostsAndGearStatsFollowBalance",
+    "gapIsDiscardedButTwoSecondsCreditsAtMostOne",
+    "chestIsGrantedExactlyOnceAndDuplicatesBecomeDust"
+  ]
+}

@@ -1,0 +1,111 @@
+package dev.pleos.entry.boss
+
+import android.content.Context
+import android.graphics.Bitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.room.Room
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import dev.pleos.boss.game.*
+import dev.pleos.entry.boss.data.*
+import kotlinx.coroutines.*
+import org.junit.*
+import org.junit.Assert.*
+import org.junit.runner.RunWith
+import java.io.File
+import java.util.UUID
+
+@RunWith(AndroidJUnit4::class)
+class GameStorageTest {
+    private lateinit var db:GameDatabase
+    private lateinit var scope:CoroutineScope
+    private lateinit var repo:GameRepository
+    private lateinit var balance:Balance
+    private val ids=object:IdSource{override fun id()=UUID.randomUUID().toString();override fun seed()=24L}
+    @Before fun create()=runBlocking {
+        val context=ApplicationProvider.getApplicationContext<Context>()
+        balance=Balance.parse(context.assets.open("balance.json").bufferedReader().use{it.readText()})
+        db=Room.inMemoryDatabaseBuilder(context,GameDatabase::class.java).build()
+        scope=CoroutineScope(SupervisorJob()+Dispatchers.IO)
+        repo=GameRepository(db,scope,balance,ids)
+        repo.ready.await()
+    }
+    @After fun close(){scope.cancel();db.close()}
+    @Test fun concurrentChestRetriesPayOnlyOnce()=runBlocking {
+        val encounter=repo.state.value.encounter!!
+        val chest=RewardGenerator(balance).create(encounter,0,ids)
+        repo.change{ActionResult(it.copy(chests=listOf(chest)),"",true)}
+        coroutineScope {
+            (1..10).map { async(Dispatchers.IO) {
+                repo.change("same-open","open:"+chest.id){GameActions(balance).openChest(it,chest.id,1,UxMode.PARKED_INTERACTIVE)}
+            }}.awaitAll()
+        }
+        assertEquals(chest.coins,repo.state.value.hero.coins)
+        assertEquals(1,repo.state.value.equipment.size)
+        assertEquals(1,repo.state.value.collection[chest.bossId])
+        assertEquals(1,db.game().chests().size)
+    }
+    @Test fun upgradeReceiptSurvivesRepositoryRecreation()=runBlocking {
+        val item=Equipment("twig_blade",Rarity.COMMON)
+        repo.change{ActionResult(it.copy(hero=it.hero.copy(coins=100,dust=3),equipment=listOf(item)),"",true)}
+        repo.change("upgrade-once","upgrade:"+item.key){GameActions(balance).upgrade(it,item.key,UxMode.PARKED_INTERACTIVE)}
+        scope.cancel()
+        scope=CoroutineScope(SupervisorJob()+Dispatchers.IO)
+        repo=GameRepository(db,scope,balance,ids)
+        repo.ready.await()
+        repo.change("upgrade-once","upgrade:"+item.key){GameActions(balance).upgrade(it,item.key,UxMode.PARKED_INTERACTIVE)}
+        assertEquals(70,repo.state.value.hero.coins)
+        assertEquals(2,repo.state.value.hero.dust)
+        assertEquals(1,repo.state.value.equipment.single().upgradeLevel)
+    }
+    @Test fun sameActionIdWithDifferentPayloadIsRejected()=runBlocking {
+        repo.change("id","first"){ActionResult(it.copy(hero=it.hero.copy(coins=40)),"first",true)}
+        val result=repo.change("id","different"){ActionResult(it.copy(hero=it.hero.copy(coins=999)),"bad",true)}
+        assertFalse(result.success);assertEquals(40,repo.state.value.hero.coins)
+    }
+    @Test fun databaseRejectsTwoChestsForOneEncounter()=runBlocking {
+        val chest=RewardGenerator(balance).create(repo.state.value.encounter!!,0,ids)
+        db.game().put(ChestRow(chest.id,chest.encounterId,Balance.json.encodeToString(Chest.serializer(),chest)))
+        var rejected=false
+        try{db.game().put(ChestRow("second-id",chest.encounterId,Balance.json.encodeToString(Chest.serializer(),chest)))}catch(_:android.database.sqlite.SQLiteConstraintException){rejected=true}
+        assertTrue(rejected);assertEquals(1,db.game().chests().size)
+    }
+}
+
+@RunWith(AndroidJUnit4::class)
+class FixtureJourneyUiTest {
+    @get:Rule val compose=createAndroidComposeRule<MainActivity>()
+    @Test fun completeJourneyOpenLootAndVisitCollection(){
+        Assume.assumeTrue(BuildConfig.IS_FIXTURE)
+        val graph=(compose.activity.application as BossApplication).graph
+        compose.waitUntil(10_000){graph.repository.ready.isCompleted}
+        compose.onNodeWithTag("screen-home").assertExists()
+        screenshot("01-home")
+        compose.onNodeWithTag("fixture-run").performScrollTo().performClick()
+        compose.waitUntil(45_000){!graph.fixtureRunning.value&&graph.repository.state.value.unopened.isNotEmpty()}
+        compose.onNodeWithTag("nav-chests").performClick()
+        compose.onNodeWithTag("screen-chests").assertExists()
+        screenshot("02-chests")
+        compose.onNodeWithTag("open-all").performClick()
+        compose.waitUntil(10_000){graph.repository.state.value.unopened.isEmpty()&&graph.repository.state.value.equipment.isNotEmpty()}
+        screenshot("03-rewards")
+        compose.onNodeWithTag("nav-equipment").performClick()
+        compose.onNodeWithTag("screen-equipment").assertExists()
+        screenshot("04-equipment")
+        compose.onNodeWithTag("nav-collection").performClick()
+        compose.onNodeWithTag("screen-collection").assertExists()
+        screenshot("05-collection")
+        compose.onNodeWithTag("nav-diagnostics").performClick()
+        compose.onNodeWithTag("screen-diagnostics").assertExists()
+        screenshot("06-diagnostics")
+        assertEquals("FIXTURE",graph.gateway.state.value.source)
+    }
+    private fun screenshot(name:String){
+        compose.waitForIdle()
+        val file=File(compose.activity.filesDir,"screenshots/"+name+".png")
+        file.parentFile!!.mkdirs()
+        file.outputStream().use{compose.onRoot().captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG,100,it)}
+    }
+}

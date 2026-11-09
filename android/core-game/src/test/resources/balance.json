@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "unit": "hp_milli",
+  "maxKillsPerSession": 2,
+  "hero": {
+    "baseHp": 100,
+    "baseAttack": 10,
+    "attackPerLevel": 2,
+    "damageDivisor": 10,
+    "xpPerBoss": 20,
+    "xpToNextLevelMultiplier": 20,
+    "maxLevel": 20,
+    "initialCoins": 0,
+    "initialDust": 0,
+    "initialEquipment": []
+  },
+  "sampling": {
+    "tickSec": 1,
+    "maxTickCreditSec": 1,
+    "gapDiscardAboveSec": 2,
+    "speedFreshSec": 2,
+    "limitFreshSec": 3,
+    "routeFreshSec": 15,
+    "movingMinKph": 5
+  },
+  "overspeed": {
+    "attackPauseAboveLimit": true,
+    "counterExcessKph": 10,
+    "sustainSec": 5,
+    "cooldownSec": 15,
+    "damageMaxHpFraction": 0.1,
+    "maxArmorReductionFraction": 0.3,
+    "limitDropGraceSec": 5,
+    "armorReductionByRarity": {
+      "COMMON": 0.05,
+      "RARE": 0.1,
+      "EPIC": 0.2,
+      "LEGENDARY": 0.3
+    }
+  },
+  "session": {
+    "arrivedParkedEndSec": 30,
+    "noGuidanceParkedEndSec": 300
+  },
+  "bosses": [
+    {
+      "id": "moss_guard",
+      "name": "이끼 수문장",
+      "baseHp": 180
+    },
+    {
+      "id": "sand_turtle",
+      "name": "모래 등껍질",
+      "baseHp": 240
+    },
+    {
+      "id": "lantern_owl",
+      "name": "등불 부엉이",
+      "baseHp": 300
+    },
+    {
+      "id": "iron_boar",
+      "name": "철갑 멧돼지",
+      "baseHp": 360
+    },
+    {
+      "id": "cloud_whale",
+      "name": "구름 고래",
+      "baseHp": 420
+    },
+    {
+      "id": "night_dragon",
+      "name": "밤빛 용",
+      "baseHp": 480
+    }
+  ],
+  "bossCycleHpMultiplier": 1.25,
+  "chest": {
+    "coinMin": 30,
+    "coinMax": 50,
+    "itemsPerChest": 1,
+    "fragmentsPerBoss": 1,
+    "collectionUnlockFragments": 10,
+    "rarityWeights": {
+      "COMMON": 60,
+      "RARE": 30,
+      "EPIC": 9,
+      "LEGENDARY": 1
+    },
+    "rarityStatMultipliers": {
+      "COMMON": 1,
+      "RARE": 1.2,
+      "EPIC": 1.5,
+      "LEGENDARY": 2
+    },
+    "pityCommonStreak": 9,
+    "duplicateDust": {
+      "COMMON": 1,
+      "RARE": 3,
+      "EPIC": 10,
+      "LEGENDARY": 30
+    }
+  },
+  "upgrades": {
+    "maxLevel": 10,
+    "coinMultiplier": 30,
+    "dustMultiplier": 1,
+    "attackPerLevel": 1,
+    "hpPerLevel": 10
+  },
+  "equipment": [
+    {
+      "id": "twig_blade",
+      "slot": "WEAPON",
+      "name": "새싹 검",
+      "baseAttack": 2,
+      "baseHp": 0
+    },
+    {
+      "id": "sand_hammer",
+      "slot": "WEAPON",
+      "name": "모래 망치",
+      "baseAttack": 3,
+      "baseHp": 0
+    },
+    {
+      "id": "star_spear",
+      "slot": "WEAPON",
+      "name": "별빛 창",
+      "baseAttack": 4,
+      "baseHp": 0
+    },
+    {
+      "id": "night_staff",
+      "slot": "WEAPON",
+      "name": "밤빛 지팡이",
+      "baseAttack": 5,
+      "baseHp": 0
+    },
+    {
+      "id": "leaf_coat",
+      "slot": "ARMOR",
+      "name": "잎사귀 외투",
+      "baseAttack": 0,
+      "baseHp": 10
+    },
+    {
+      "id": "shell_mail",
+      "slot": "ARMOR",
+      "name": "등껍질 갑옷",
+      "baseAttack": 0,
+      "baseHp": 15
+    },
+    {
+      "id": "cloud_robe",
+      "slot": "ARMOR",
+      "name": "구름 로브",
+      "baseAttack": 0,
+      "baseHp": 20
+    },
+    {
+      "id": "iron_plate",
+      "slot": "ARMOR",
+      "name": "철빛 갑옷",
+      "baseAttack": 0,
+      "baseHp": 25
+    },
+    {
+      "id": "moss_charm",
+      "slot": "CHARM",
+      "name": "이끼 부적",
+      "baseAttack": 1,
+      "baseHp": 5
+    },
+    {
+      "id": "lantern_charm",
+      "slot": "CHARM",
+      "name": "등불 부적",
+      "baseAttack": 1,
+      "baseHp": 10
+    },
+    {
+      "id": "whale_charm",
+      "slot": "CHARM",
+      "name": "고래 부적",
+      "baseAttack": 2,
+      "baseHp": 5
+    },
+    {
+      "id": "dragon_charm",
+      "slot": "CHARM",
+      "name": "용빛 부적",
+      "baseAttack": 2,
+      "baseHp": 10
+    }
+  ],
+  "balanceVersion": "1.0.0"
+}
