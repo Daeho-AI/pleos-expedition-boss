@@ -72,4 +72,10 @@ class GameActions(private val balance: Balance) {
             ), "+" + next + " 강화 완료", true,
         )
     }
+    fun unequip(game: GameState, key: String, ux: UxMode): ActionResult {
+        if (ux != UxMode.PARKED_INTERACTIVE) return ActionResult(game, "주차 후 해제할 수 있어요", false)
+        var next = game.copy(equipped = game.equipped.filterValues { it != key })
+        next.activeSession?.let { next = next.withSession(it.copy(hpMilli = it.hpMilli.coerceAtMost(balance.stats(next).maxHpMilli))) }
+        return ActionResult(next, "장착을 해제했어요", true)
+    }
 }

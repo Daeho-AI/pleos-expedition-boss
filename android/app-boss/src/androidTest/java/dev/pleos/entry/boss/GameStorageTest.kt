@@ -72,11 +72,44 @@ class GameStorageTest {
         try{db.game().put(ChestRow("second-id",chest.encounterId,Balance.json.encodeToString(Chest.serializer(),chest)))}catch(_:android.database.sqlite.SQLiteConstraintException){rejected=true}
         assertTrue(rejected);assertEquals(1,db.game().chests().size)
     }
+    @Test fun pendingDepositAndDeletedInventorySurviveRestart()=runBlocking {
+        val item=Equipment("twig_blade",Rarity.RARE,3)
+        repo.change{ActionResult(it.copy(equipment=listOf(item)),"",true)}
+        repo.change("deposit-test","deposit"){EconomyActions(balance).reserve(it,item.key,"outgoing","test-realm",UxMode.PARKED_INTERACTIVE,1)}
+        scope.cancel();scope=CoroutineScope(SupervisorJob()+Dispatchers.IO)
+        repo=GameRepository(db,scope,balance,ids);repo.ready.await()
+        assertTrue(repo.state.value.equipment.isEmpty())
+        assertEquals(item,repo.state.value.economy.deposits.single().item)
+        repo.change{EconomyActions(balance).finishDeposit(it,"outgoing",true)}
+        assertEquals(item,repo.state.value.equipment.single())
+        assertTrue(repo.state.value.economy.deposits.isEmpty())
+    }
+    @Test fun repeatedDeliveryAfterRestartCannotCreditTwice()=runBlocking {
+        val item=Equipment("twig_blade",Rarity.RARE,3)
+        repo.change("delivery-test","fixed-item"){EconomyActions(balance).receive(it,item)}
+        scope.cancel();scope=CoroutineScope(SupervisorJob()+Dispatchers.IO)
+        repo=GameRepository(db,scope,balance,ids);repo.ready.await()
+        repo.change("delivery-test","fixed-item"){EconomyActions(balance).receive(it,item)}
+        assertEquals(1,repo.state.value.equipment.size)
+        assertEquals(0,repo.state.value.hero.dust)
+    }
 }
 
 @RunWith(AndroidJUnit4::class)
 class FixtureJourneyUiTest {
     @get:Rule val compose=createAndroidComposeRule<MainActivity>()
+    private var saved:GameState?=null
+    @Before fun saveProgress()=runBlocking {
+        val graph=(compose.activity.application as BossApplication).graph
+        graph.repository.ready.await();saved=graph.repository.state.value
+        graph.repository.change{ActionResult(GameState(encounter=graph.balance.encounter(0,1,graph.ids)),"",true)}
+        Unit
+    }
+    @After fun restoreProgress()=runBlocking {
+        val graph=(compose.activity.application as BossApplication).graph
+        saved?.let{original->graph.repository.change{ActionResult(original,"",true)}}
+        Unit
+    }
     @Test fun completeJourneyOpenLootAndVisitCollection(){
         Assume.assumeTrue(BuildConfig.IS_FIXTURE)
         val graph=(compose.activity.application as BossApplication).graph
@@ -97,7 +130,7 @@ class FixtureJourneyUiTest {
         compose.onNodeWithTag("nav-collection").performClick()
         compose.onNodeWithTag("screen-collection").assertExists()
         screenshot("05-collection")
-        compose.onNodeWithTag("nav-diagnostics").performClick()
+        compose.onNodeWithTag("nav-diagnostics").performScrollTo().performClick()
         compose.onNodeWithTag("screen-diagnostics").assertExists()
         screenshot("06-diagnostics")
         assertEquals("FIXTURE",graph.gateway.state.value.source)

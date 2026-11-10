@@ -4,10 +4,12 @@ Windows 자동 설치는 D드라이브를 전제로 한다. 다른 운영체제�
 
 ## 첫 설치
 
-1. [Windows 시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.1.0-preview.1/ExpeditionBoss-Windows-Demo.zip)을 `D:\Codex\ExpeditionBoss`에 압축 해제한다.
+1. [Windows 시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.2.0-preview.1/ExpeditionBoss-Windows-Demo.zip)을 `D:\Codex\ExpeditionBoss`에 압축 해제한다.
 2. Python 3.11 이상을 설치한다. `py -3 --version` 또는 `python --version`으로 확인한다.
 3. `setup.cmd`를 실행한다. 최초 다운로드는 네트워크에 따라 오래 걸릴 수 있다. 완료 후 게임 창이 열린다.
 4. 다음에는 `demo.cmd`로 실행한다.
+
+0.1.0에서 업데이트할 때도 새 ZIP의 `setup.cmd`를 먼저 실행해 친구 서버 환경을 추가한다. 이후에는 `demo.cmd`가 서버도 함께 켠다. 기존 가상 기기와 친구 서버의 데이터는 삭제하지 않는다. 같은 종류의 APK끼리 업데이트하면 게임 진행을 유지한다.
 
 ZIP에는 Google·현대의 SDK나 에뮬레이터 이미지를 재배포하지 않는다. 설치기가 공식 배포처에서 받으며 각 구성요소의 이용 조건이 적용된다. 네트워크나 배포처 접근 제한이 있으면 중단한다.
 
@@ -24,7 +26,9 @@ ZIP에는 Google·현대의 SDK나 에뮬레이터 이미지를 재배포하지 
 | 이미 실행 중이라는 안내 | 중복 실행을 막는 정상 메시지. 처음 열린 창을 기다림 |
 | APK 서명 불일치 | SDK debug와 release는 같은 ID지만 다른 서명. 새 기기를 사용. 실행기는 기존 앱/데이터를 자동 삭제하지 않음 |
 | APK가 없다고 나옴 | `setup.cmd` 실행. SDK debug가 필요하면 아래 다운로드 명령 사용 |
-| 실제 SDK 버전에서 보스 체력이 그대로 | 유효한 내비 안내·차량 이동·양수 제한속도가 모두 필요. 테스트 환경에서 양수 제한속도 미확인은 알려진 제한사항 |
+| 친구 서버에 연결하지 못함 | `social-server.cmd` 실행 후 새로고침. 기본 에뮬레이터 주소는 `http://10.0.2.2:8765`. 두 사용자가 같은 서버인지 확인 |
+| 장비가 전송 확인 대기에 있음 | 서버를 다시 켜고 새로고침. 취소하려면 교환함의 전송 취소 확인 사용. 게임이나 서버 데이터를 삭제하지 않음 |
+| 실제 SDK 버전에서 보스 체력이 그대로 | 유효한 내비 안내·차량 이동·양수 제한속도가 모두 필요. 앱의 연결 화면에서 안내·속도·도로 정보 상태 확인 |
 
 ## 선택 실행
 

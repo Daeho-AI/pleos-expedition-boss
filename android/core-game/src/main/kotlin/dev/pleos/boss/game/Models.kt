@@ -39,6 +39,7 @@ import kotlinx.serialization.Serializable
     val equipped: Map<Slot, String> = emptyMap(),
     val collection: Map<String, Int> = emptyMap(),
     val events: List<BattleEvent> = emptyList(),
+    val economy: EconomyState = EconomyState(),
 ) {
     val activeSession: TripSession? get() = sessions.lastOrNull { it.state != SessionState.FINISHED }
     val lastFinishedSession: TripSession? get() = sessions.lastOrNull { it.state == SessionState.FINISHED }

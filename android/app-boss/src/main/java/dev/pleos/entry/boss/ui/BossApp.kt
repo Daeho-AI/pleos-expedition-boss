@@ -32,12 +32,12 @@ import kotlinx.coroutines.delay
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
-private val Night=Color(0xFF0B1220)
-private val Panel=Color(0xFF141F30)
-private val Edge=Color(0xFF293448)
-private val Gold=Color(0xFFE8BD73)
-private val Muted=Color(0xFF91A0B7)
-private val Mint=Color(0xFF82B9A4)
+internal val Night=Color(0xFF0B1220)
+internal val Panel=Color(0xFF141F30)
+internal val Edge=Color(0xFF293448)
+internal val Gold=Color(0xFFE8BD73)
+internal val Muted=Color(0xFF91A0B7)
+internal val Mint=Color(0xFF82B9A4)
 private val Ink=Color(0xFFEDF0F5)
 private fun rarityColor(r:Rarity)=when(r){Rarity.COMMON->Color(0xFFA7B7C7);Rarity.RARE->Color(0xFF7CB9F0);Rarity.EPIC->Color(0xFFC197EF);Rarity.LEGENDARY->Gold}
 private fun rarityName(r:Rarity)=when(r){Rarity.COMMON->"일반";Rarity.RARE->"희귀";Rarity.EPIC->"영웅";Rarity.LEGENDARY->"전설"}
@@ -50,7 +50,7 @@ private fun comparison(game:GameState,b:Balance,key:String,slot:Slot):String {
     return "장착하면  공격 "+signed((after.attack-before.attack).toLong())+" · 체력 "+signed((after.maxHpMilli-before.maxHpMilli)/1000)
 }
 private data class Tab(val id:String,val label:String,val icon:ImageVector)
-private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests","상자",Icons.Default.Inventory2),Tab("equipment","장비",Icons.Default.Shield),Tab("collection","도감",Icons.Default.AutoAwesome),Tab("history","기록",Icons.Default.History),Tab("diagnostics","연결",Icons.Default.SettingsInputAntenna))
+private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests","상자",Icons.Default.Inventory2),Tab("equipment","장비",Icons.Default.Shield),Tab("shop","상점",Icons.Default.Storefront),Tab("friends","친구·교환",Icons.Default.People),Tab("collection","도감",Icons.Default.AutoAwesome),Tab("history","기록",Icons.Default.History),Tab("diagnostics","연결",Icons.Default.SettingsInputAntenna))
 
 @Composable fun BossApp(graph:BossGraph,requestPermissions:()->Unit){
     val game by graph.repository.state.collectAsStateWithLifecycle()
@@ -84,7 +84,7 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
                             tabs.forEach{tab->FilterChip(selected=screen==tab.id,onClick={screen=tab.id},label={Text(tab.label)},modifier=Modifier.heightIn(min=64.dp).testTag("nav-"+tab.id))}
                         }
                         Row(Modifier.weight(1f).fillMaxWidth()){
-                            if(wide) Column(Modifier.width(104.dp).fillMaxHeight().padding(top=10.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(12.dp)){
+                            if(wide) Column(Modifier.width(104.dp).fillMaxHeight().verticalScroll(rememberScrollState()).padding(top=10.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(12.dp)){
                                 tabs.forEach{tab->
                                     val selected=screen==tab.id
                                     Column(Modifier.size(88.dp,78.dp).clip(RoundedCornerShape(18.dp)).background(if(selected)Gold.copy(alpha=.12f)else Color.Transparent).clickable{screen=tab.id}.testTag("nav-"+tab.id),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.Center){
@@ -99,6 +99,8 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
                                     "home"->HomeScreen(game,graph,status,wide,{screen=it},playing)
                                     "chests"->ChestScreen(game,graph,busy)
                                     "equipment"->EquipmentScreen(game,graph,busy)
+                                    "shop"->ShopScreen(game,graph,busy)
+                                    "friends"->FriendsScreen(game,graph)
                                     "collection"->CollectionScreen(game,graph.balance)
                                     "history"->HistoryScreen(game)
                                     else->DiagnosticsScreen(gateway,graph,fatal,now,requestPermissions)
@@ -126,8 +128,8 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
 }
 @Composable private fun Money(icon:ImageVector,value:String,color:Color){Row(verticalAlignment=Alignment.CenterVertically){Icon(icon,null,tint=color,modifier=Modifier.size(21.dp));Spacer(Modifier.width(7.dp));Text(value,fontSize=20.sp,fontWeight=FontWeight.SemiBold)}}
 @Composable private fun BadgePill(text:String,color:Color=Gold){Surface(color=color.copy(alpha=.1f),shape=RoundedCornerShape(24.dp),border=BorderStroke(1.dp,color.copy(alpha=.3f))){Text(text,color=color,fontSize=12.sp,modifier=Modifier.padding(horizontal=13.dp,vertical=7.dp))}}
-@Composable private fun CardBox(modifier:Modifier=Modifier,content:@Composable ColumnScope.()->Unit){Surface(modifier,shape=RoundedCornerShape(24.dp),color=Panel,border=BorderStroke(1.dp,Edge)){Column(Modifier.padding(24.dp),content=content)}}
-@Composable private fun ActionButton(text:String,onClick:()->Unit,modifier:Modifier=Modifier,enabled:Boolean=true){
+@Composable internal fun CardBox(modifier:Modifier=Modifier,content:@Composable ColumnScope.()->Unit){Surface(modifier,shape=RoundedCornerShape(24.dp),color=Panel,border=BorderStroke(1.dp,Edge)){Column(Modifier.padding(24.dp),content=content)}}
+@Composable internal fun ActionButton(text:String,onClick:()->Unit,modifier:Modifier=Modifier,enabled:Boolean=true){
     Button(onClick=onClick,enabled=enabled,modifier=modifier.heightIn(min=64.dp),shape=RoundedCornerShape(16.dp)){Text(text,fontSize=17.sp,fontWeight=FontWeight.SemiBold)}
 }
 @Composable private fun Title(title:String,subtitle:String){

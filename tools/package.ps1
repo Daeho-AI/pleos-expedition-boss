@@ -12,17 +12,24 @@ foreach ($flavor in @('fixture','pleos')) {
     $manifest += [ordered]@{file=[IO.Path]::GetFileName($output); bytes=(Get-Item -LiteralPath $output).Length; sha256=(Get-FileHash -LiteralPath $output -Algorithm SHA256).Hash.ToLowerInvariant()}
 }
 $report = Join-Path $root 'docs\validation'
-Copy-Item -LiteralPath (Join-Path $build 'core-game\test-results\test\TEST-dev.pleos.boss.game.GameTest.xml') -Destination $report
-[xml]$testXml = Get-Content -LiteralPath (Join-Path $report 'TEST-dev.pleos.boss.game.GameTest.xml') -Raw
+$suites = @(Get-ChildItem -LiteralPath (Join-Path $build 'core-game\test-results\test') -Filter 'TEST-*.xml' | ForEach-Object {
+    [xml]$testXml = Get-Content -LiteralPath $_.FullName -Raw
+    [ordered]@{
+        suite = [string]$testXml.testsuite.name
+        tests = [int]$testXml.testsuite.tests
+        failures = [int]$testXml.testsuite.failures
+        errors = [int]$testXml.testsuite.errors
+        skipped = [int]$testXml.testsuite.skipped
+        timestamp = [string]$testXml.testsuite.timestamp
+        testCases = @($testXml.testsuite.testcase | ForEach-Object { [string]$_.name })
+    }
+})
 [ordered]@{
-    suite = [string]$testXml.testsuite.name
-    tests = [int]$testXml.testsuite.tests
-    failures = [int]$testXml.testsuite.failures
-    errors = [int]$testXml.testsuite.errors
-    skipped = [int]$testXml.testsuite.skipped
-    timestamp = [string]$testXml.testsuite.timestamp
-    testCases = @($testXml.testsuite.testcase | ForEach-Object { [string]$_.name })
-} | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $report 'unit-tests.json') -Encoding UTF8
+    tests = ($suites | ForEach-Object { $_.tests } | Measure-Object -Sum).Sum
+    failures = ($suites | ForEach-Object { $_.failures } | Measure-Object -Sum).Sum
+    errors = ($suites | ForEach-Object { $_.errors } | Measure-Object -Sum).Sum
+    suites = $suites
+} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $report 'unit-tests.json') -Encoding UTF8
 [ordered]@{
     packagedAt=(Get-Date -Format o)
     naviHelper='3.0.5'

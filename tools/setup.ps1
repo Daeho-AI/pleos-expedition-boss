@@ -21,6 +21,8 @@ try {
     Write-Host '기존 개발 도구가 있으면 재사용합니다. 다운로드·설치에는 인터넷 연결이 필요합니다.'
     & $python.Source @pythonArgs (Join-Path $PSScriptRoot 'bootstrap_android.py') --pleos-image
     if ($LASTEXITCODE -ne 0) { throw '개발 도구 준비에 실패했습니다. 위 메시지와 개발 도구 폴더의 sdk-install.log를 확인해 주세요.' }
+    & $python.Source @pythonArgs (Join-Path $PSScriptRoot 'bootstrap_social.py')
+    if ($LASTEXITCODE -ne 0) { throw '친구 서버 준비에 실패했습니다. 위 설치 메시지를 확인해 주세요.' }
     & (Join-Path $PSScriptRoot 'download_apks.ps1') -Mode fixture
     Write-Host '준비가 끝났습니다. 다음부터는 demo.cmd로 실행할 수 있습니다.'
     if (-not $PrepareOnly) { & (Join-Path $PSScriptRoot 'run_demo.ps1') -Mode fixture }

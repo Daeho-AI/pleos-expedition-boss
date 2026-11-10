@@ -12,6 +12,7 @@ configure_storage(Path(config["toolchainRoot"]))
 adb = str(Path(config["androidSdk"]) / "platform-tools/adb.exe")
 parser = argparse.ArgumentParser()
 parser.add_argument("--fixture-tests", action="store_true")
+parser.add_argument("--test-class", action="append", choices=["GameStorageTest", "FixtureJourneyUiTest", "CommerceUiTest", "SocialIntegrationTest"])
 parser.add_argument("--reset-demo", action="store_true", help="Clear only the fixture app's test progress before UI tests.")
 parser.add_argument("--pull-images", action="store_true")
 parser.add_argument("--sdk-report", help="Output evidence filename, e.g. sdk-after-background.json")
@@ -34,7 +35,9 @@ if args.fixture_tests:
         print(run("install", "-r", str(apk)).stdout.decode(), flush=True)
     if args.reset_demo:
         print(run("shell", "pm", "clear", "--user", user, fixture).stdout.decode(), flush=True)
-    for test, filename in (("GameStorageTest", "instrumentation-storage.txt"), ("FixtureJourneyUiTest", "instrumentation-ui.txt")):
+    for test, filename in (("GameStorageTest", "instrumentation-storage.txt"), ("FixtureJourneyUiTest", "instrumentation-ui.txt"), ("CommerceUiTest", "instrumentation-commerce.txt"), ("SocialIntegrationTest", "instrumentation-social.txt")):
+        if args.test_class and test not in args.test_class:
+            continue
         completed = run("shell", "am", "instrument", "-w", "-r", "-e", "class", "dev.pleos.entry.boss." + test,
                         fixture + ".test/androidx.test.runner.AndroidJUnitRunner")
         result = completed.stdout.decode("utf-8", errors="replace").replace("\r", "")

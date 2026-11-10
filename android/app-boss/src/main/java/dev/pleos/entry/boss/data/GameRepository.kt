@@ -39,6 +39,7 @@ class GameRepository(private val db: GameDatabase, scope: CoroutineScope, privat
                         equipped = dao.equipped().associate { Slot.valueOf(it.slot) to it.itemKey },
                         collection = dao.collection().associate { it.bossId to it.fragments },
                         events = dao.events().map { json.decodeFromString<BattleEvent>(it.payload) },
+                        economy = dao.economy()?.let { json.decodeFromString<EconomyState>(it.payload) } ?: EconomyState(),
                     )
                 }
                 mutable.value = loaded
@@ -70,6 +71,12 @@ class GameRepository(private val db: GameDatabase, scope: CoroutineScope, privat
     }
     private suspend fun saveDiff(before: GameState, next: GameState) {
         if (before.hero != next.hero || dao.hero() == null) dao.put(HeroRow(payload = json.encodeToString(next.hero)))
+        if (before.economy != next.economy) dao.put(EconomyRow(payload = json.encodeToString(next.economy)))
+        for (item in before.equipment) if (next.equipment.none { it.key == item.key }) dao.deleteEquipment(item.key)
+        for (slot in before.equipped.keys) if (slot !in next.equipped.keys) dao.deleteEquipped(slot.name)
+        for (chest in before.chests) if (next.chests.none { it.id == chest.id }) dao.deleteChest(chest.id)
+        for (session in before.sessions) if (next.sessions.none { it.id == session.id }) dao.deleteSession(session.id)
+        for (boss in before.collection.keys) if (boss !in next.collection.keys) dao.deleteCollection(boss)
         if (before.encounter != next.encounter) {
             val oldEncounter = before.encounter
             if (oldEncounter != null && oldEncounter.id != next.encounter?.id) {

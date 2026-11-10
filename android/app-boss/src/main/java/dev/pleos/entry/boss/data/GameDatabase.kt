@@ -12,9 +12,11 @@ data class ChestRow(@PrimaryKey val id: String, val encounterId: String, val pay
 @Entity(tableName = "collection") data class CollectionRow(@PrimaryKey val bossId: String, val fragments: Int)
 @Entity(tableName = "battle_event") data class EventRow(@PrimaryKey val id: String, val at: Long, val payload: String)
 @Entity(tableName = "processed_action") data class ActionRow(@PrimaryKey val id: String, val signature: String, val message: String, val success: Boolean, val at: Long)
+@Entity(tableName = "economy") data class EconomyRow(@PrimaryKey val id: String = "local", val payload: String)
 
 @Dao interface GameDao {
     @Query("SELECT * FROM hero WHERE id='local'") suspend fun hero(): HeroRow?
+    @Query("SELECT * FROM economy WHERE id='local'") suspend fun economy(): EconomyRow?
     @Query("SELECT * FROM encounter WHERE active=1 LIMIT 1") suspend fun encounter(): EncounterRow?
     @Query("SELECT * FROM trip_session ORDER BY startedAt,id") suspend fun sessions(): List<SessionRow>
     @Query("SELECT * FROM chest ORDER BY rowid") suspend fun chests(): List<ChestRow>
@@ -24,6 +26,12 @@ data class ChestRow(@PrimaryKey val id: String, val encounterId: String, val pay
     @Query("SELECT * FROM battle_event ORDER BY at,id") suspend fun events(): List<EventRow>
     @Query("SELECT * FROM processed_action WHERE id=:id") suspend fun action(id: String): ActionRow?
     @Upsert suspend fun put(row: HeroRow)
+    @Upsert suspend fun put(row: EconomyRow)
+    @Query("DELETE FROM equipment WHERE itemKey=:key") suspend fun deleteEquipment(key: String)
+    @Query("DELETE FROM equipped WHERE slot=:slot") suspend fun deleteEquipped(slot: String)
+    @Query("DELETE FROM chest WHERE id=:id") suspend fun deleteChest(id: String)
+    @Query("DELETE FROM trip_session WHERE id=:id") suspend fun deleteSession(id: String)
+    @Query("DELETE FROM collection WHERE bossId=:id") suspend fun deleteCollection(id: String)
     @Upsert suspend fun put(row: EncounterRow)
     @Upsert suspend fun put(row: SessionRow)
     @Query("SELECT * FROM chest WHERE id=:id") suspend fun chest(id: String): ChestRow?
@@ -43,5 +51,14 @@ data class ChestRow(@PrimaryKey val id: String, val encounterId: String, val pay
 }
 
 @Database(entities = [HeroRow::class, EncounterRow::class, SessionRow::class, ChestRow::class,
-    EquipmentRow::class, EquippedRow::class, CollectionRow::class, EventRow::class, ActionRow::class], version = 1, exportSchema = false)
-abstract class GameDatabase : RoomDatabase() { abstract fun game(): GameDao }
+    EquipmentRow::class, EquippedRow::class, CollectionRow::class, EventRow::class, ActionRow::class, EconomyRow::class], version = 2, exportSchema = false)
+abstract class GameDatabase : RoomDatabase() {
+    abstract fun game(): GameDao
+    companion object {
+        val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS economy (id TEXT NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(id))")
+            }
+        }
+    }
+}

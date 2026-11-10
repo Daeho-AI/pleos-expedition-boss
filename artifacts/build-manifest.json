@@ -1,5 +1,5 @@
 {
-  "packagedAt": "2026-11-09T15:32:02.1691634+09:00",
+  "packagedAt": "2026-11-10T12:28:28.9636332+09:00",
   "naviHelper": "3.0.5",
   "compileSdk": 35,
   "minimumSdk": 33,
@@ -7,13 +7,13 @@
   "artifacts": [
     {
       "file": "boss-fixture-debug.apk",
-      "bytes": 57415750,
-      "sha256": "741bac850379429c98ad48a97130b4b0491f27928f0777a40f84a596f996bf46"
+      "bytes": 57790824,
+      "sha256": "d3d0adace1f0785294f0a6667984983964a5b428150860c43180b43688c2848b"
     },
     {
       "file": "boss-pleos-debug.apk",
-      "bytes": 57415714,
-      "sha256": "a822259c6b1bba5e58343bd77bca04f201ce1421208cd5159cb493729dbc8072"
+      "bytes": 57790804,
+      "sha256": "1fe61fc224d88865f4475b5c4a6c6ec1918562b3cf76291f9458c381414c2a7c"
     }
   ]
 }

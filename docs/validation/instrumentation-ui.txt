@@ -15,7 +15,7 @@ INSTRUMENTATION_STATUS: test=completeJourneyOpenLootAndVisitCollection
 INSTRUMENTATION_STATUS_CODE: 0
 INSTRUMENTATION_RESULT: stream=
 
-Time: 10.732
+Time: 19.987
 
 OK (1 test)
 

@@ -30,10 +30,12 @@ class BossGraph(val context: Context) {
         override fun id() = UUID.randomUUID().toString()
         override fun seed() = random.nextLong()
     }
-    val db = Room.databaseBuilder(context, GameDatabase::class.java, "expedition-v1.db").build()
+    val db = Room.databaseBuilder(context, GameDatabase::class.java, "expedition-v1.db").addMigrations(GameDatabase.MIGRATION_1_2).build()
     val repository = GameRepository(db, scope, balance, ids)
     private val engine = CombatEngine(balance, ids)
     private val actions = GameActions(balance)
+    val economy = EconomyActions(balance)
+    val social by lazy { dev.pleos.entry.boss.social.SocialController(this) }
     val gateway: VehicleGateway = if (BuildConfig.IS_FIXTURE) FixtureVehicleGateway() else PleosVehicleGateway(context, scope)
     val status = MutableStateFlow(CombatStatus())
     val messages = MutableSharedFlow<String>(extraBufferCapacity = 16)
@@ -132,7 +134,10 @@ class BossGraph(val context: Context) {
         }
     }
     fun equip(key: String) = action("equip:" + key) { game, ux -> actions.equip(game, key, ux) }
+    fun unequip(key: String) = action("unequip:" + key) { game, ux -> actions.unequip(game, key, ux) }
     fun upgrade(key: String) = action("upgrade:" + key) { game, ux -> actions.upgrade(game, key, ux) }
+    fun buy(product: String) = action("buy:" + product) { game, ux -> economy.buy(game, product, ux, System.currentTimeMillis()) }
+    fun sell(key: String) = action("sell:" + key) { game, ux -> economy.sell(game, key, ux, System.currentTimeMillis()) }
     fun reconnect() {
         scope.launch(Dispatchers.Main.immediate) { gateway.stop(); gateway.start() }
     }

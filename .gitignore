@@ -6,6 +6,12 @@
 **/*.iml
 **/__pycache__/
 tools/toolchain-state.json
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.pid
+server/.venv/
 artifacts/*.apk
 artifacts/*.part
 work/
@@ -29,6 +35,8 @@ artifacts/screenshots/*
 !artifacts/screenshots/04-equipment.png
 !artifacts/screenshots/05-collection.png
 !artifacts/screenshots/06-diagnostics.png
+!artifacts/screenshots/07-shop.png
+!artifacts/screenshots/08-friends.png
 docs/validation/*.json
 !docs/validation/sdk-final-motion.json
 !docs/validation/sdk-final-route-mode.json
@@ -37,3 +45,5 @@ docs/validation/*.xml
 docs/validation/*.txt
 !docs/validation/instrumentation-storage.txt
 !docs/validation/instrumentation-ui.txt
+!docs/validation/instrumentation-commerce.txt
+!docs/validation/instrumentation-social.txt

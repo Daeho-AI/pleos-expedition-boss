@@ -10,6 +10,8 @@
 | Gradle wrapper / Android Gradle Plugin | 8.10.2 / 8.8.0; [Gradle](https://gradle.org/), Android Developers |
 | Eclipse Temurin JDK | 17.0.21+9; [Adoptium](https://adoptium.net/) |
 | Pleos Connect Emulator | 2.1.0; 현대자동차그룹 공식 개발자 배포처 |
+| Uvicorn / Click / h11 | 0.51.0 / 8.3.2 / 0.16.0; [Uvicorn](https://www.uvicorn.org/), Python 친구 서버 |
+| SQLite | Python 표준 라이브러리의 sqlite3; 친구·교환 데이터 저장 |
 
 Gradle wrapper의 원래 라이선스 헤더를 보존한다. SDK·JDK·에뮬레이터 설치본과 이미지는 소스 저장소 또는 Windows 시연 ZIP에 포함하지 않는다. 설치 도구가 공식 배포처에서 내려받는다. 앱 의존 라이브러리는 Android 빌드 과정에서 APK에 포함된다.
 

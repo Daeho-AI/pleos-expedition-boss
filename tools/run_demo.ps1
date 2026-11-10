@@ -84,6 +84,7 @@ try {
     Start-Transcript -Path $log -Force | Out-Null
     $recording = $true
     Write-Host '원정 보스를 시작합니다.'
+    if ($Mode -eq 'fixture') { & (Join-Path $PSScriptRoot 'start_social.ps1') }
     if (-not (Test-Path -LiteralPath $adb) -or -not (Test-Path -LiteralPath $apk)) {
         throw '실행 파일이 없습니다. setup.cmd를 실행해 주세요. SDK 시연 APK는 tools\download_apks.ps1 -Mode pleos로 받을 수 있습니다.'
     }
