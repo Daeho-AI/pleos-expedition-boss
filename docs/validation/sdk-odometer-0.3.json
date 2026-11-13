@@ -1,0 +1,13 @@
+{
+  "source": "PLEOS_SDK",
+  "vehicleSdk": "2.3.2",
+  "api": "Odometer.getCurrentDistanceDriven",
+  "apiUnit": "km",
+  "storedUnit": "meters",
+  "recordedAtEpochMs": 1794555237829,
+  "deviceFingerprint": "Pleos/crp_avd/crp_avd_x86_64:14/RELEASE.release_connect_v2.1.0/release_connect_v2.1.0:user/test-keys",
+  "ux": "PARKED_INTERACTIVE",
+  "odometerStatus": "누적 주행거리 수신",
+  "odometerMeters": 0,
+  "note": "Read-only parked emulator observation. No vehicle value was injected; no actual journey was performed."
+}

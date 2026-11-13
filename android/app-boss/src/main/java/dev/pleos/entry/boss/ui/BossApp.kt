@@ -59,18 +59,25 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
     val busy by graph.actionBusy.collectAsStateWithLifecycle()
     val playing by graph.fixtureRunning.collectAsStateWithLifecycle()
     val fatal by graph.fatalError.collectAsStateWithLifecycle()
+    val foreground by graph.foreground.collectAsStateWithLifecycle()
     var screen by rememberSaveable{mutableStateOf("home")}
     val snackbar=remember{SnackbarHostState()}
-    val now by produceState(SystemClock.elapsedRealtime()){while(true){delay(500);value=SystemClock.elapsedRealtime()}}
+    val now by produceState(SystemClock.elapsedRealtime(),foreground,gateway.ux){
+        value=SystemClock.elapsedRealtime()
+        while(foreground&&gateway.ux==UxMode.PARKED_INTERACTIVE){delay(500);value=SystemClock.elapsedRealtime()}
+    }
     val ux=if(BuildConfig.IS_FIXTURE)gateway.ux else gateway.input(now).ux
-    LaunchedEffect(graph){graph.messages.collect{snackbar.showSnackbar(it)}}
+    LaunchedEffect(graph,ux,foreground){
+        if(foreground&&ux==UxMode.PARKED_INTERACTIVE)graph.messages.collect{snackbar.showSnackbar(it)}
+        else snackbar.currentSnackbarData?.dismiss()
+    }
     MaterialTheme(
         colorScheme=darkColorScheme(primary=Gold,onPrimary=Night,secondary=Mint,background=Night,surface=Panel,onSurface=Ink,onBackground=Ink,outline=Edge),
         typography=Typography(bodyLarge=androidx.compose.ui.text.TextStyle(fontSize=18.sp,lineHeight=28.sp),bodyMedium=androidx.compose.ui.text.TextStyle(fontSize=16.sp,lineHeight=24.sp)),
     ){
-        Scaffold(containerColor=Night,snackbarHost={SnackbarHost(snackbar)}){padding->
-            if(ux!=UxMode.PARKED_INTERACTIVE){
-                if(!BuildConfig.IS_FIXTURE&&gateway.setupAllowed){
+        Scaffold(containerColor=Night,snackbarHost={if(foreground&&ux==UxMode.PARKED_INTERACTIVE)SnackbarHost(snackbar)}){padding->
+            if(!foreground||ux!=UxMode.PARKED_INTERACTIVE){
+                if(foreground&&ux==UxMode.UNKNOWN&&!BuildConfig.IS_FIXTURE&&gateway.setupAllowed){
                     SetupScreen(gateway,requestPermissions,graph::reconnect,graph::exportEvidence)
                 }else{
                     LimitedScreen(status.reason,playing,BuildConfig.IS_FIXTURE)
@@ -144,14 +151,15 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
     val stats=graph.balance.stats(game)
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("screen-home")){
         Row(verticalAlignment=Alignment.CenterVertically){
-            Column(Modifier.weight(1f)){Text("다음 여정에도, 이어지는 모험",fontSize=30.sp,fontWeight=FontWeight.Bold);Spacer(Modifier.height(9.dp));Text("지난 여정의 보스 체력과 성장은 그대로 남아 있어요.",color=Muted)}
+            Column(Modifier.weight(1f)){Text("돌아오면, 다시 이어지는 사냥",fontSize=30.sp,fontWeight=FontWeight.Bold);Spacer(Modifier.height(9.dp));Text("주차 중 자동 사냥 · 이동 후에는 필살의 일격",color=Muted)}
             BadgePill("CHAPTER "+String.format("%02d",encounter?.cycle?:1),Mint)
         }
         Spacer(Modifier.height(26.dp))
+        game.hero.progress.lastReturn?.let { ReturnCard(it,game.hero.progress.awaitingDistance);Spacer(Modifier.height(18.dp)) }
         @Composable fun bossCard(modifier:Modifier){
             CardBox(modifier){
-                Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){BadgePill("BOSS "+(index+1).toString().padStart(2,'0'));Spacer(Modifier.weight(1f));Text("이번 운행 최대 2마리",color=Muted,fontSize=14.sp)}
-                BossArt(index,Modifier.fillMaxWidth().height(if(wide)320.dp else 240.dp))
+                Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){BadgePill("BOSS "+(index+1).toString().padStart(2,'0'));Spacer(Modifier.weight(1f));Text(if(game.hero.autoExpeditionEnabled)"자동 사냥 중" else "사냥 준비",color=Muted,fontSize=14.sp)}
+                BattleScene(game,Modifier.fillMaxWidth().height(if(wide)320.dp else 240.dp))
                 Text(boss.name,fontSize=29.sp,fontWeight=FontWeight.Bold)
                 Spacer(Modifier.height(7.dp));Text(listOf("오래된 숲의 첫 번째 수호자","모래 바람을 두른 느긋한 여행자","길 잃은 별을 모으는 밤의 파수꾼","묵직한 갑옷 속 작은 호기심","구름 사이를 유영하는 거대한 친구","모든 여정 끝에 기다리는 밤의 왕")[index],color=Muted,fontSize=15.sp)
                 Spacer(Modifier.height(23.dp))
@@ -180,9 +188,10 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
                     Spacer(Modifier.height(12.dp));ActionButton("보상 확인하기",{navigate("chests")},Modifier.fillMaxWidth(),game.unopened.isNotEmpty())
                 }
                 CardBox(Modifier.fillMaxWidth()){
-                    Row(verticalAlignment=Alignment.CenterVertically){Icon(Icons.Default.DirectionsCar,null,tint=Mint);Spacer(Modifier.width(10.dp));Text(if(game.hero.autoExpeditionEnabled)"자동 원정 켜짐" else "자동 원정 준비",fontWeight=FontWeight.SemiBold)}
-                    Spacer(Modifier.height(12.dp));Text(if(game.hero.autoExpeditionEnabled)"유효한 주행 데이터가 들어오면 자동으로 기록합니다." else "목적지 안내를 따라 이동하면 전투가 계산돼요. 보상은 주차 후 확인하세요.",color=Muted,fontSize=15.sp)
-                    Spacer(Modifier.height(17.dp));ActionButton(if(game.hero.autoExpeditionEnabled)"원정 기록 끄기" else "자동 원정 켜기",{graph.setEnabled(!game.hero.autoExpeditionEnabled)},Modifier.fillMaxWidth().testTag("enable-expedition"),!playing)
+                    Row(verticalAlignment=Alignment.CenterVertically){Icon(Icons.Default.DirectionsCar,null,tint=Mint);Spacer(Modifier.width(10.dp));Text(if(game.hero.autoExpeditionEnabled)"자동 사냥 켜짐" else "자동 사냥 준비",fontWeight=FontWeight.SemiBold)}
+                    Spacer(Modifier.height(12.dp));Text("주행 중에는 게임이 멈춥니다. 돌아오면 비운 시간의 보상을 받고 자동으로 사냥을 이어갑니다.",color=Muted,fontSize=15.sp)
+                    Spacer(Modifier.height(10.dp));Text("필살기: 이동 1km마다 출발 공격력의 2배 피해 · 최대 30km · 현재 보스에게 한 번",color=Mint,fontSize=14.sp)
+                    Spacer(Modifier.height(17.dp));ActionButton(if(game.hero.autoExpeditionEnabled)"자동 사냥 끄기" else "자동 사냥 켜기",{graph.setEnabled(!game.hero.autoExpeditionEnabled)},Modifier.fillMaxWidth().testTag("enable-expedition"),!playing)
                 }
             }
         }
@@ -192,11 +201,11 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
             Spacer(Modifier.height(22.dp))
             CardBox(Modifier.fillMaxWidth()){
                 Text("시연실",color=Gold,fontWeight=FontWeight.Bold,fontSize=17.sp)
-                Text("가상 주행을 빠르게 재생합니다. 실제 차량 데이터나 실제 이동 기록이 아닙니다.",color=Muted,fontSize=14.sp)
+                Text("주행 중 중단 → 주차 후 정산을 빠르게 체험합니다. 시간과 거리는 시연 데이터입니다.",color=Muted,fontSize=14.sp)
                 Spacer(Modifier.height(14.dp))
                 Row(horizontalArrangement=Arrangement.spacedBy(12.dp)){
-                    ActionButton("7분 가상 운행",{graph.simulateTrip()},Modifier.weight(1f).testTag("fixture-run"),!playing)
-                    OutlinedButton(onClick={graph.simulateTrip(60)},enabled=!playing,modifier=Modifier.weight(1f).heightIn(min=64.dp),shape=RoundedCornerShape(16.dp)){Text("짧은 운행 · 1분")}
+                    ActionButton("7분 비움 · 10km 복귀",{graph.simulateTrip()},Modifier.weight(1f).testTag("fixture-run"),!playing)
+                    OutlinedButton(onClick={graph.simulateTrip(60,2.0)},enabled=!playing,modifier=Modifier.weight(1f).heightIn(min=64.dp),shape=RoundedCornerShape(16.dp)){Text("1분 비움 · 2km 복귀")}
                 }
             }
         }
@@ -314,8 +323,8 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
 }
 @Composable private fun HistoryScreen(game:GameState){
     Column(Modifier.fillMaxSize().testTag("screen-history")){
-        Title("차곡차곡 쌓인 여정","짧은 운행도 보스에게 남긴 피해는 사라지지 않아요.")
-        if(game.sessions.isEmpty())EmptyCard("첫 여정을 기다리고 있어요","자동 원정을 켜면 안내 주행의 진행 상황이 기기에 저장됩니다.",Icons.Default.Explore)
+        Title("자동 사냥 기록","주차 중 전투와 복귀 때 정산한 성장 기록입니다.")
+        if(game.sessions.isEmpty())EmptyCard("첫 사냥을 기다리고 있어요","주차 상태에서 자동 사냥을 켜세요.",Icons.Default.Explore)
         LazyColumn(verticalArrangement=Arrangement.spacedBy(16.dp)){
             items(game.sessions.asReversed(),key={it.id}){trip->
                 CardBox(Modifier.fillMaxWidth()){
@@ -349,6 +358,8 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
             DiagnosticRow("안내 상태 수신",state.routeEvents.toString()+"회 · "+age(state.routeAtMs))
             DiagnosticRow("백그라운드 수신",state.receivedWhileBackground.toString()+"회")
             DiagnosticRow("주차·화면 상태",graph.ux().name)
+            DiagnosticRow("Vehicle SDK 2.3.2",state.odometerStatus)
+            DiagnosticRow("누적 주행거리",state.odometerMeters?.let{String.format("%.3f km",it/1000.0)}?:"미수신 · 기본 사냥 가능")
             state.lastError?.let{Text(it,color=Color(0xFFEE9C91),modifier=Modifier.padding(top=12.dp))}
             fatal?.let{Text(it,color=Color(0xFFEE9C91),modifier=Modifier.padding(top=12.dp))}
         }
@@ -361,8 +372,8 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
         if(BuildConfig.IS_FIXTURE){
             Spacer(Modifier.height(24.dp))
             Row(horizontalArrangement=Arrangement.spacedBy(12.dp)){
-                OutlinedButton(onClick={graph.simulateTrip(21,70.0)},modifier=Modifier.heightIn(min=64.dp)){Text("과속 반격 시연")}
-                OutlinedButton(onClick={graph.simulateTrip(60,40.0,null)},modifier=Modifier.heightIn(min=64.dp)){Text("도로 정보 단절 시연")}
+                OutlinedButton(onClick={graph.simulateTrip(10,10.0)},modifier=Modifier.heightIn(min=64.dp)){Text("10km 필살기 시연")}
+                OutlinedButton(onClick={graph.simulateTrip(60,0.0)},modifier=Modifier.heightIn(min=64.dp)){Text("이동 없는 복귀 시연")}
             }
         }
     }
@@ -373,7 +384,7 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
         CardBox(Modifier.widthIn(max=700.dp).fillMaxWidth()){
             Icon(Icons.Default.Shield,null,tint=Gold,modifier=Modifier.size(50.dp))
             Spacer(Modifier.height(22.dp));Text("첫 원정을 준비해요",fontSize=32.sp,fontWeight=FontWeight.Bold)
-            Spacer(Modifier.height(16.dp));Text("차량 속도와 기어 상태를 읽어 자동 전투와 주차 화면을 구분합니다. 위치나 이동 경로는 저장하지 않습니다.",color=Muted)
+            Spacer(Modifier.height(16.dp));Text("기어와 화면 허용 상태로 주차를 확인합니다. 누적 주행거리의 차이는 복귀 시 필살기에 사용하며, 위치와 이동 경로는 수집하지 않습니다.",color=Muted)
             Spacer(Modifier.height(24.dp))
             DiagnosticRow("차량 속도 권한",if(state.speedPermission)"허용됨" else "필요")
             DiagnosticRow("기어 상태 권한",if(state.powertrainPermission)"허용됨" else "필요")
@@ -389,9 +400,9 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
         Column(horizontalAlignment=Alignment.CenterHorizontally){
             Icon(Icons.Default.DirectionsCar,null,tint=Mint,modifier=Modifier.size(48.dp))
             Spacer(Modifier.height(28.dp))
-            Text(if(playing)"가상 운행 재생 중" else "원정 기록 상태",fontSize=30.sp,fontWeight=FontWeight.SemiBold)
+            Text(if(playing)"주행 중 중단 시연" else "주차 후 이용해 주세요",fontSize=30.sp,fontWeight=FontWeight.SemiBold)
             Spacer(Modifier.height(16.dp));Text(if(playing)"시연 데이터 · 실제 주행 아님" else reason,color=Muted,fontSize=18.sp)
-            Spacer(Modifier.height(24.dp));Text("보상과 장비는 주차 후 확인할 수 있어요.",color=Muted,fontSize=15.sp)
+            Spacer(Modifier.height(24.dp));Text("게임이 일시 중지되었습니다. 복귀하면 보상을 정산합니다.",color=Muted,fontSize=15.sp)
             if(fixture)Text("FIXTURE",color=Gold,modifier=Modifier.padding(top=20.dp),fontSize=12.sp)
         }
     }

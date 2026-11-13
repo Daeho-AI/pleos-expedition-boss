@@ -41,9 +41,11 @@ docs/validation/*.json
 !docs/validation/sdk-final-motion.json
 !docs/validation/sdk-final-route-mode.json
 !docs/validation/unit-tests.json
+!docs/validation/sdk-odometer-0.3.json
 docs/validation/*.xml
 docs/validation/*.txt
 !docs/validation/instrumentation-storage.txt
 !docs/validation/instrumentation-ui.txt
 !docs/validation/instrumentation-commerce.txt
 !docs/validation/instrumentation-social.txt
+!docs/validation/instrumentation-odometer.txt

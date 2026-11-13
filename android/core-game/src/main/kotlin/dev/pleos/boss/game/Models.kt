@@ -10,6 +10,8 @@ import kotlinx.serialization.Serializable
 @Serializable data class Hero(
     val level: Int = 1, val xp: Int = 0, val coins: Int = 0, val dust: Int = 0,
     val commonChestStreak: Int = 0, val autoExpeditionEnabled: Boolean = false,
+    val combatRemainder: Long = 0,
+    val progress: IdleProgress = IdleProgress(),
 )
 @Serializable data class Encounter(
     val id: String, val bossId: String, val bossIndex: Int, val cycle: Int,
@@ -56,7 +58,7 @@ data class DrivingInput(
     val guidanceActive: Boolean = false, val guidanceAtMs: Long? = null,
     val ux: UxMode = UxMode.UNKNOWN,
 )
-data class CombatStatus(val state: BattleState = BattleState.READY, val reason: String = "원정을 켜면 여정이 이어집니다")
+data class CombatStatus(val state: BattleState = BattleState.READY, val reason: String = "주차 후 자동 사냥을 시작하세요")
 data class TickResult(val game: GameState, val status: CombatStatus)
 data class HeroStats(val attack: Int, val maxHpMilli: Long, val counterReduction: Double)
 interface IdSource { fun id(): String; fun seed(): Long }

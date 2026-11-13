@@ -1,4 +1,4 @@
-﻿param([ValidateSet('fixture','pleos')][string]$Mode = 'fixture', [int]$BootTimeoutSeconds = 240)
+﻿param([ValidateSet('fixture','pleos')][string]$Mode = 'fixture', [int]$BootTimeoutSeconds = 480, [ValidateSet('auto','host','software','swiftshader')][string]$GpuMode = 'auto')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $statePath = Join-Path $PSScriptRoot 'toolchain-state.json'
@@ -61,7 +61,7 @@ function Wait-BossDevice {
         }
         if ((Get-Date) -ge $nextMessage) {
             $elapsed = [int]((Get-Date) - $started).TotalSeconds
-            Write-Host "기기를 준비하고 있습니다... $elapsed 초 (처음에는 1~2분 걸릴 수 있습니다.)"
+            Write-Host "기기를 준비하고 있습니다... $elapsed 초 (PC 상태에 따라 몇 분 걸릴 수 있습니다.)"
             $nextMessage = (Get-Date).AddSeconds(15)
         }
         if (((Get-Date) - $started).TotalSeconds -gt 12 -and @(Get-BossEmulatorProcesses).Count -eq 0) {
@@ -107,7 +107,7 @@ try {
         $ownedProcesses = @()
     }
     if (($device.ExitCode -ne 0 -or $device.Text -ne 'device') -and $ownedProcesses.Count -eq 0) {
-        & (Join-Path $PSScriptRoot 'start_emulator.ps1') -Visible
+        & (Join-Path $PSScriptRoot 'start_emulator.ps1') -Visible -GpuMode $GpuMode
     }
     $driverUser = Wait-BossDevice
     Write-Host '기기가 준비됐습니다. 게임을 열고 있습니다...'
@@ -137,7 +137,7 @@ try {
     $pidResult = Invoke-BossAdb -AdbArguments @('-s','emulator-5554','shell','pidof',$package)
     if ($pidResult.ExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($pidResult.Text)) { throw '게임이 시작 직후 종료됐습니다.' }
     if ($Mode -eq 'fixture') {
-        Write-Host '게임이 열렸습니다. 기기 창에서 [7분 가상 운행]을 눌러 보세요.'
+        Write-Host '게임이 열렸습니다. 기기 창에서 [7분 비움 · 10km 복귀]을 눌러 보세요.'
     } else {
         Write-Host '실제 SDK 연동용 게임 화면이 열렸습니다.'
         $forward = Invoke-BossAdb -AdbArguments @('-s','emulator-5554','forward','tcp:8088','tcp:8088')

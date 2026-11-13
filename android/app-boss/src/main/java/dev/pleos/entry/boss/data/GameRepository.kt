@@ -7,6 +7,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.encodeToString
@@ -53,20 +55,23 @@ class GameRepository(private val db: GameDatabase, scope: CoroutineScope, privat
     suspend fun change(actionId: String? = null, signature: String = "", transform: (GameState) -> ActionResult): ActionResult {
         ready.await()
         return mutex.withLock {
-            val before = mutable.value
-            val result = db.withTransaction {
-                val receipt = actionId?.let { dao.action(it) }
-                if (receipt != null) {
-                    if (receipt.signature != signature) return@withTransaction ActionResult(before, "동일 작업 ID의 내용이 달라요", false)
-                    return@withTransaction ActionResult(before, receipt.message, receipt.success)
+            // Cancellation must not leave the in-memory checkpoint behind an already committed reward.
+            withContext(NonCancellable) {
+                val before = mutable.value
+                val result = db.withTransaction {
+                    val receipt = actionId?.let { dao.action(it) }
+                    if (receipt != null) {
+                        if (receipt.signature != signature) return@withTransaction ActionResult(before, "동일 작업 ID의 내용이 달라요", false)
+                        return@withTransaction ActionResult(before, receipt.message, receipt.success)
+                    }
+                    val result = transform(before)
+                    if (result.game != before) saveDiff(before, result.game)
+                    if (actionId != null) dao.put(ActionRow(actionId, signature, result.message, result.success, System.currentTimeMillis()))
+                    result
                 }
-                val result = transform(before)
-                if (result.game != before) saveDiff(before, result.game)
-                if (actionId != null) dao.put(ActionRow(actionId, signature, result.message, result.success, System.currentTimeMillis()))
+                mutable.value = result.game
                 result
             }
-            mutable.value = result.game
-            result
         }
     }
     private suspend fun saveDiff(before: GameState, next: GameState) {

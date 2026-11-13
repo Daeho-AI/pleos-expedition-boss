@@ -1,6 +1,5 @@
 package dev.pleos.entry.boss
 
-import android.Manifest
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,11 +24,11 @@ class MainActivity : ComponentActivity() {
             })
             BossApp(model.graph) {
                 if (graph.gateway.state.value.setupAllowed || BuildConfig.IS_FIXTURE) {
-                    permissionRequest.launch(arrayOf("android.car.permission.CAR_SPEED", "android.car.permission.CAR_POWERTRAIN", Manifest.permission.POST_NOTIFICATIONS))
+                    permissionRequest.launch(arrayOf("android.car.permission.CAR_SPEED", "android.car.permission.CAR_POWERTRAIN"))
                 }
             }
         }
     }
-    override fun onStart() { super.onStart(); graph.visible(true) }
-    override fun onStop() { graph.visible(false); super.onStop() }
+    override fun onResume() { super.onResume(); graph.visible(true) }
+    override fun onPause() { graph.visible(false); super.onPause() }
 }

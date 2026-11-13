@@ -33,6 +33,8 @@ $suites = @(Get-ChildItem -LiteralPath (Join-Path $build 'core-game\test-results
 [ordered]@{
     packagedAt=(Get-Date -Format o)
     naviHelper='3.0.5'
+    vehicleSdk='2.3.2'
+    versionName='0.3.0'
     compileSdk=35
     minimumSdk=33
     buildType='debug'

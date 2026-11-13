@@ -32,15 +32,19 @@ class PleosVehicleGateway(private val context: Context, private val scope: Corou
     private val mutable = MutableStateFlow(GatewayState(source = "PLEOS_SDK"))
     override val state = mutable.asStateFlow()
     override var onSignal: ((NavSignal) -> Unit)? = null
-    override var activityVisible: Boolean = true
+    @Volatile override var activityVisible: Boolean = false
     private var navi: NaviHelper? = null
     private var car: Car? = null
     private var properties: CarPropertyManager? = null
     private var restrictions: CarUxRestrictionsManager? = null
     private var poll: Job? = null
-    private var started = false
+    @Volatile private var started = false
     private var speedSubscribed = false
+    private var gearSubscribed = false
     private var gear: Int? = null
+    private val odometer = ParkedOdometerClient(context,
+        allowed = { started && activityVisible && mutable.value.ux == UxMode.PARKED_INTERACTIVE },
+        publish = { meters, at, status -> mutable.update { it.copy(odometerMeters = meters, odometerAtMs = at, odometerStatus = status) } })
     private fun now() = SystemClock.elapsedRealtime()
     private fun permission(name: String) = context.checkSelfPermission(name) == PackageManager.PERMISSION_GRANTED
     private fun error(label: String, t: Throwable) {
@@ -48,8 +52,10 @@ class PleosVehicleGateway(private val context: Context, private val scope: Corou
         mutable.update { it.copy(lastError = label + ": " + t.javaClass.simpleName + " " + (t.message ?: "")) }
     }
     private fun backgroundIncrement() = if (activityVisible) 0L else 1L
+    private fun canReadNavigation() = started && activityVisible && mutable.value.ux == UxMode.PARKED_INTERACTIVE
     private val listener = object : NaviHelperEventListener {
         override fun onRouteStateInfo(routeStateInfo: RouteStateInfo) {
+            if (!started || !activityVisible || mutable.value.ux != UxMode.PARKED_INTERACTIVE) return
             // Use the explicit guidance mode. On Connect 2.1.0 isRouting can remain
             // false during active native guidance; retain it as diagnostic evidence.
             mutable.update { it.copy(naviMode = routeStateInfo.naviMode.name, rawIsRouting = routeStateInfo.isRouting,
@@ -58,6 +64,7 @@ class PleosVehicleGateway(private val context: Context, private val scope: Corou
                 receivedWhileBackground = it.receivedWhileBackground + backgroundIncrement()) }
         }
         override fun onNavigationStatus(status: NavigationStatus) {
+            if (!started || !activityVisible || mutable.value.ux != UxMode.PARKED_INTERACTIVE) return
             Log.i("BossSDK", "NavigationStatus=" + status.name)
             // Transition events are not guaranteed to replay after a process restart.
             // Fresh RouteStateInfo.naviMode is the authoritative current mode.
@@ -66,17 +73,21 @@ class PleosVehicleGateway(private val context: Context, private val scope: Corou
                 routeGuidance = it.routeGuidance && status == NavigationStatus.ROUTE_DRIVE) }
         }
         override fun onCurrentRoadSpeedLimit(speedLimit: Int) {
+            if (!started || !activityVisible || mutable.value.ux != UxMode.PARKED_INTERACTIVE) return
             mutable.update { it.copy(limitKph = speedLimit.takeIf { limit -> limit > 0 }, limitAtMs = now(), limitEvents = it.limitEvents + 1, receivedWhileBackground = it.receivedWhileBackground + backgroundIncrement()) }
         }
         override fun onDestinationArrived(destinationArrivedInfo: DestinationArrivedInfo) {
+            if (!canReadNavigation()) return
             onSignal?.invoke(NavSignal.ARRIVED)
         }
-        override fun onDestinationChanged() { onSignal?.invoke(NavSignal.DESTINATION_CHANGED) }
-        override fun onRouteCancelled() { mutable.update { it.copy(routeGuidance = false, routeAtMs = now()) } }
-        override fun onError(errorCode: NaviErrorCode) { mutable.update { it.copy(lastError = "내비: " + errorCode.name) } }
+        override fun onDestinationChanged() { if (canReadNavigation()) onSignal?.invoke(NavSignal.DESTINATION_CHANGED) }
+        override fun onRouteCancelled() { if (canReadNavigation()) mutable.update { it.copy(routeGuidance = false, routeAtMs = now()) } }
+        override fun onError(errorCode: NaviErrorCode) { if (canReadNavigation()) mutable.update { it.copy(lastError = "내비: " + errorCode.name) } }
     }
     private val speedCallback = object : CarPropertyManager.CarPropertyEventCallback {
         override fun onChangeEvent(value: CarPropertyValue<*>) {
+            if (!started) return
+            if (value.propertyId == VehiclePropertyIds.GEAR_SELECTION) { readUx(); return }
             if (value.propertyId != VehiclePropertyIds.PERF_VEHICLE_SPEED) return
             if (!permission(Car.PERMISSION_SPEED) || value.status != CarPropertyValue.STATUS_AVAILABLE) {
                 mutable.update { it.copy(speedKph = null, speedAtMs = null) }
@@ -91,6 +102,11 @@ class PleosVehicleGateway(private val context: Context, private val scope: Corou
                 receivedWhileBackground = it.receivedWhileBackground + backgroundIncrement()) }
         }
         override fun onErrorEvent(propertyId: Int, areaId: Int) {
+            if (!started) return
+            if (propertyId == VehiclePropertyIds.GEAR_SELECTION) {
+                mutable.update { it.copy(ux = UxMode.UNKNOWN, uxAtMs = null) }
+                return
+            }
             mutable.update { it.copy(speedKph = null, speedAtMs = null, lastError = "차량 속도 표본 오류") }
         }
     }
@@ -98,27 +114,44 @@ class PleosVehicleGateway(private val context: Context, private val scope: Corou
         if (started) return
         started = true
         mutable.update { it.copy(naviConnection = "연결 중", carConnection = "연결 중") }
+        connectCar()
+    }
+    private fun startNavigation() {
+        if (navi != null) return
         try {
-            navi = NaviHelper(context).also { helper ->
+            val helper = NaviHelper(context)
+            navi = helper
+            with(helper) {
                 helper.addListener(listener)
                 helper.initialize(
                     onConnected = {
+                        if (navi !== helper || !canReadNavigation()) return@initialize
                         mutable.update { it.copy(naviConnection = "CONNECTED") }
                         Log.i("BossSDK", "NaviHelper 3.0.5 connected")
                         runCatching { helper.getRouteStateInfo() }.onFailure { error("내비 상태 조회", it) }
                     },
                     onFailed = { t ->
+                        if (navi !== helper || !canReadNavigation()) return@initialize
                         mutable.update { it.copy(naviConnection = "FAILED", routeGuidance = false, routeAtMs = null, limitKph = null, limitAtMs = null) }
                         error("내비 연결", t)
                     },
                 )
             }
         } catch (t: Throwable) { mutable.update { it.copy(naviConnection = "UNAVAILABLE") }; error("내비 초기화", t) }
+    }
+    private fun stopNavigation() {
+        runCatching { navi?.removeListener(listener); navi?.release() }; navi = null
+        mutable.update { it.copy(naviConnection = "STOPPED", routeGuidance = false, routeAtMs = null,
+            limitKph = null, limitAtMs = null, odometerMeters = null, odometerAtMs = null, odometerStatus = "주차 후 확인") }
+        odometer.stop()
+    }
+    private fun connectCar() {
         try {
             car = Car.createCar(context, Handler(Looper.getMainLooper()), Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT) { connected, ready ->
                 if (!started) return@createCar
                 if (!ready) {
-                    properties = null; restrictions = null; speedSubscribed = false; gear = null
+                    properties = null; restrictions = null; speedSubscribed = false; gearSubscribed = false; gear = null
+                    stopNavigation()
                     mutable.update { it.copy(carConnection = "DISCONNECTED", ux = UxMode.UNKNOWN, uxAtMs = null, speedKph = null, speedAtMs = null, setupAllowed = false) }
                 } else {
                     properties = connected.getCarManager(Car.PROPERTY_SERVICE) as? CarPropertyManager
@@ -136,7 +169,7 @@ class PleosVehicleGateway(private val context: Context, private val scope: Corou
             while (isActive && started) {
                 refreshPermissions()
                 readUx()
-                if (loops++ % 5 == 0 && mutable.value.naviConnection == "CONNECTED") {
+                if (loops++ % 5 == 0 && mutable.value.ux == UxMode.PARKED_INTERACTIVE && mutable.value.naviConnection == "CONNECTED") {
                     runCatching { navi?.getRouteStateInfo() }.onFailure { error("내비 상태 조회", it) }
                 }
                 delay(1000)
@@ -148,12 +181,13 @@ class PleosVehicleGateway(private val context: Context, private val scope: Corou
         val powertrain = permission(Car.PERMISSION_POWERTRAIN)
         mutable.update { it.copy(speedPermission = speed, powertrainPermission = powertrain) }
         val manager = properties ?: return
-        if (!speed && speedSubscribed) {
-            runCatching { manager.unregisterCallback(speedCallback) }
+        val observeSpeed = speed && mutable.value.ux == UxMode.PARKED_INTERACTIVE
+        if (!observeSpeed && speedSubscribed) {
+            runCatching { manager.unregisterCallback(speedCallback, VehiclePropertyIds.PERF_VEHICLE_SPEED) }
             speedSubscribed = false
             mutable.update { it.copy(speedKph = null, speedAtMs = null) }
         }
-        if (speed && !speedSubscribed) {
+        if (observeSpeed && !speedSubscribed) {
             try {
                 val config = manager.getCarPropertyConfig(VehiclePropertyIds.PERF_VEHICLE_SPEED)
                 if (config == null) {
@@ -164,9 +198,18 @@ class PleosVehicleGateway(private val context: Context, private val scope: Corou
                 }
             } catch (t: Throwable) { error("속도 구독", t) }
         }
+        if (powertrain && !gearSubscribed) {
+            runCatching {
+                gearSubscribed = manager.registerCallback(speedCallback, VehiclePropertyIds.GEAR_SELECTION, CarPropertyManager.SENSOR_RATE_ONCHANGE)
+            }.onFailure { error("기어 구독", it) }
+        } else if (!powertrain && gearSubscribed) {
+            runCatching { manager.unregisterCallback(speedCallback, VehiclePropertyIds.GEAR_SELECTION) }
+            gearSubscribed = false
+        }
         if (!powertrain) gear = null
     }
     private fun readUx() {
+        if (!started) return
         try {
             val ux = restrictions?.currentCarUxRestrictions
             val setupAllowed = ux != null && !ux.isRequiresDistractionOptimization &&
@@ -181,19 +224,24 @@ class PleosVehicleGateway(private val context: Context, private val scope: Corou
                 else -> UxMode.DRIVING_LIMITED
             }
             mutable.update { it.copy(ux = mode, uxAtMs = now(), setupAllowed = setupAllowed) }
+            if (mode == UxMode.PARKED_INTERACTIVE && activityVisible) {
+                startNavigation()
+                odometer.refresh()
+            } else stopNavigation()
         } catch (t: Throwable) {
             mutable.update { it.copy(ux = UxMode.UNKNOWN, uxAtMs = null, setupAllowed = false) }
+            stopNavigation()
             error("주차 상태", t)
         }
     }
     override fun stop() {
         if (!started) return
         started = false; poll?.cancel(); poll = null
-        runCatching { navi?.removeListener(listener); navi?.release() }; navi = null
+        stopNavigation()
         runCatching { properties?.unregisterCallback(speedCallback) }
         runCatching { restrictions?.unregisterListener() }
         runCatching { car?.disconnect() }
-        car = null; properties = null; restrictions = null; speedSubscribed = false; gear = null
+        car = null; properties = null; restrictions = null; speedSubscribed = false; gearSubscribed = false; gear = null
         mutable.update { it.copy(naviConnection = "STOPPED", carConnection = "STOPPED", navStatus = "UNKNOWN",
             naviMode = "UNKNOWN", rawIsRouting = null,
             routeGuidance = false, routeAtMs = null, speedKph = null, speedAtMs = null,

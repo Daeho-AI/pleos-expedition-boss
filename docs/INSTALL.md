@@ -4,12 +4,12 @@ Windows 자동 설치는 D드라이브를 전제로 한다. 다른 운영체제�
 
 ## 첫 설치
 
-1. [Windows 시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.2.0-preview.1/ExpeditionBoss-Windows-Demo.zip)을 `D:\Codex\ExpeditionBoss`에 압축 해제한다.
+1. [Windows 시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.3.0-preview.1/ExpeditionBoss-Windows-Demo.zip)을 `D:\Codex\ExpeditionBoss`에 압축 해제한다.
 2. Python 3.11 이상을 설치한다. `py -3 --version` 또는 `python --version`으로 확인한다.
 3. `setup.cmd`를 실행한다. 최초 다운로드는 네트워크에 따라 오래 걸릴 수 있다. 완료 후 게임 창이 열린다.
 4. 다음에는 `demo.cmd`로 실행한다.
 
-0.1.0에서 업데이트할 때도 새 ZIP의 `setup.cmd`를 먼저 실행해 친구 서버 환경을 추가한다. 이후에는 `demo.cmd`가 서버도 함께 켠다. 기존 가상 기기와 친구 서버의 데이터는 삭제하지 않는다. 같은 종류의 APK끼리 업데이트하면 게임 진행을 유지한다.
+이전 버전에서 업데이트할 때도 새 ZIP의 `setup.cmd`를 먼저 실행한다. 이후에는 `demo.cmd`가 서버도 함께 켠다. 기존 가상 기기와 친구 서버의 데이터는 삭제하지 않는다. 같은 종류의 APK끼리 업데이트하면 게임 진행을 유지한다.
 
 ZIP에는 Google·현대의 SDK나 에뮬레이터 이미지를 재배포하지 않는다. 설치기가 공식 배포처에서 받으며 각 구성요소의 이용 조건이 적용된다. 네트워크나 배포처 접근 제한이 있으면 중단한다.
 
@@ -21,14 +21,16 @@ ZIP에는 Google·현대의 SDK나 에뮬레이터 이미지를 재배포하지 
 | D드라이브 오류 | D의 폴더에 모두 압축 해제했는지 확인. 이 도구는 C로 자동 전환하지 않음 |
 | 실행 정책 오류 | 직접 `.ps1` 대신 `setup.cmd`/`demo.cmd` 사용. 조직 PC 정책이 실행을 차단하면 관리자에게 확인 |
 | 가상 기기가 시작 직후 종료 | CPU 가상화 및 Windows Hypervisor Platform 설정 확인. [Android 공식 가속 안내](https://developer.android.com/studio/run/emulator-acceleration) 참고 |
-| 기기가 계속 준비 중 | `D:\Codex\PleosBossEmulator\emulator-error.log`와 저장소 `work/launcher-last.log` 확인. 기본 대기 제한 240초 |
+| 기기가 계속 준비 중 | `D:\Codex\PleosBossEmulator\emulator-error.log`와 저장소 `work/launcher-last.log` 확인. 기본 대기 제한 480초 |
+| 화면이 멈추거나 검게 표시됨 | 실행 중인 원정 보스 기기 창을 닫은 뒤 아래 SwiftShader 실행 명령 사용. 저장 데이터는 유지되며 소프트웨어 그래픽으로 실행 |
 | 다른 기기가 연결됐다고 나옴 | 실행기는 `emulator-5554`의 공식 Pleos 이미지를 확인함. 다른 AVD가 포트 5554를 사용 중이면 해당 기기를 직접 종료하거나 다른 포트로 변경 |
 | 이미 실행 중이라는 안내 | 중복 실행을 막는 정상 메시지. 처음 열린 창을 기다림 |
 | APK 서명 불일치 | SDK debug와 release는 같은 ID지만 다른 서명. 새 기기를 사용. 실행기는 기존 앱/데이터를 자동 삭제하지 않음 |
 | APK가 없다고 나옴 | `setup.cmd` 실행. SDK debug가 필요하면 아래 다운로드 명령 사용 |
 | 친구 서버에 연결하지 못함 | `social-server.cmd` 실행 후 새로고침. 기본 에뮬레이터 주소는 `http://10.0.2.2:8765`. 두 사용자가 같은 서버인지 확인 |
 | 장비가 전송 확인 대기에 있음 | 서버를 다시 켜고 새로고침. 취소하려면 교환함의 전송 취소 확인 사용. 게임이나 서버 데이터를 삭제하지 않음 |
-| 실제 SDK 버전에서 보스 체력이 그대로 | 유효한 내비 안내·차량 이동·양수 제한속도가 모두 필요. 앱의 연결 화면에서 안내·속도·도로 정보 상태 확인 |
+| 보스 체력이 그대로 | 자동 사냥이 켜져 있는지, 앱이 전면이며 P 기어·UX 제한 해제 상태인지 확인. 주행 중이나 다른 앱을 보는 동안에는 멈추고 돌아왔을 때 정산함 |
+| 필살기가 나오지 않음 | 최초 거리 조회에는 기준만 저장함. 이후 주차 후 복귀 시 누적거리 증가가 확인되어야 함. 연결 화면의 Vehicle SDK 거리 상태 확인. 거리값이 없어도 기본 사냥은 계속됨 |
 
 ## 선택 실행
 
@@ -41,6 +43,9 @@ powershell -ExecutionPolicy Bypass -File .\tools\setup.ps1 -PrepareOnly
 # SDK 진단용 debug APK를 다운로드하고 실행
 powershell -ExecutionPolicy Bypass -File .\tools\download_apks.ps1 -Mode pleos
 powershell -ExecutionPolicy Bypass -File .\tools\run_demo.ps1 -Mode pleos
+
+# 그래픽 호환성 문제가 있는 PC에서 시연 실행
+powershell -ExecutionPolicy Bypass -File .\tools\run_demo.ps1 -GpuMode swiftshader
 ```
 
 SDK 모드 실행기는 Virtual Console용 8088 포트를 연결한다. 브라우저에서 `http://127.0.0.1:8088/`을 열어 공식 콘솔 세션을 활성화한다. 가상 차량 값 변경은 에뮬레이터 시험에서만 사용한다.

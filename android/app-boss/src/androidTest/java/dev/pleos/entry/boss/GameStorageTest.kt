@@ -93,6 +93,28 @@ class GameStorageTest {
         assertEquals(1,repo.state.value.equipment.size)
         assertEquals(0,repo.state.value.hero.dust)
     }
+    @Test fun returnAndDistanceCheckpointCommitTogetherAcrossRestart()=runBlocking {
+        val engine=IdleEngine(balance,ids)
+        fun input(ms:Long,meters:Long)=ProgressInput(ProgressClock(1_800_000_000_000L+ms,ms,1),
+            UxMode.PARKED_INTERACTIVE,true,DistanceSample(meters,ms,"TEST_ODOMETER_KM"))
+        repo.change{ActionResult(engine.setEnabled(it,true,input(0,100_000)),"",true)}
+        repo.change{ActionResult(engine.pause(it,1_800_000_000_000L),"",true)}
+        scope.cancel();scope=CoroutineScope(SupervisorJob()+Dispatchers.IO)
+        repo=GameRepository(db,scope,balance,ids);repo.ready.await()
+        coroutineScope {
+            (1..8).map { async(Dispatchers.IO) {
+                repo.change { ActionResult(engine.tick(it,input(60_000,102_000)).game,"",true) }
+            }}.awaitAll()
+        }
+        assertEquals(80_000,repo.state.value.encounter!!.hpMilli)
+        assertEquals(1,repo.state.value.events.count{it.type=="FINISHING_STRIKE"})
+        assertEquals(102_000L,repo.state.value.hero.progress.distanceBaselineMeters)
+        val settled=repo.state.value
+        scope.cancel();scope=CoroutineScope(SupervisorJob()+Dispatchers.IO)
+        repo=GameRepository(db,scope,balance,ids);repo.ready.await()
+        repo.change { ActionResult(engine.tick(it,input(60_000,102_000)).game,"",true) }
+        assertEquals(settled,repo.state.value)
+    }
 }
 
 @RunWith(AndroidJUnit4::class)
@@ -115,9 +137,10 @@ class FixtureJourneyUiTest {
         val graph=(compose.activity.application as BossApplication).graph
         compose.waitUntil(10_000){graph.repository.ready.isCompleted}
         compose.onNodeWithTag("screen-home").assertExists()
-        screenshot("01-home")
         compose.onNodeWithTag("fixture-run").performScrollTo().performClick()
         compose.waitUntil(45_000){!graph.fixtureRunning.value&&graph.repository.state.value.unopened.isNotEmpty()}
+        compose.onNodeWithTag("return-summary").performScrollTo()
+        screenshot("01-home")
         compose.onNodeWithTag("nav-chests").performClick()
         compose.onNodeWithTag("screen-chests").assertExists()
         screenshot("02-chests")
@@ -134,6 +157,41 @@ class FixtureJourneyUiTest {
         compose.onNodeWithTag("screen-diagnostics").assertExists()
         screenshot("06-diagnostics")
         assertEquals("FIXTURE",graph.gateway.state.value.source)
+    }
+    @Test fun drivingHidesCombatStopsLoopAndParkingAutomaticallySettles() {
+        Assume.assumeTrue(BuildConfig.IS_FIXTURE)
+        val graph=(compose.activity.application as BossApplication).graph
+        val fixture=graph.gateway as dev.pleos.entry.boss.sdk.FixtureVehicleGateway
+        compose.runOnUiThread{fixture.park()}
+        graph.setEnabled(true)
+        compose.waitUntil(10_000){graph.combatLoopActive.value&&graph.repository.state.value.hero.progress.distanceBaselineMeters!=null}
+        compose.runOnUiThread{fixture.drive(android.os.SystemClock.elapsedRealtime())}
+        compose.waitUntil(10_000){!graph.combatLoopActive.value&&graph.repository.state.value.hero.progress.paused}
+        compose.onNodeWithTag("driving-limited").assertExists()
+        compose.onNodeWithTag("battle-scene").assertDoesNotExist()
+        val stopped=graph.repository.state.value
+        Thread.sleep(1_200)
+        assertEquals(stopped,graph.repository.state.value)
+        compose.runOnUiThread{fixture.park(distanceMeters=(fixture.state.value.odometerMeters?:100_000)+2_000)}
+        compose.waitUntil(10_000){graph.combatLoopActive.value&&
+            (graph.repository.state.value.hero.progress.lastReturn?.strikeDamageMilli?:0)>0}
+        compose.onNodeWithTag("return-summary").assertExists()
+        val hp=graph.repository.state.value.encounter!!.hpMilli
+        compose.waitUntil(5_000){graph.repository.state.value.encounter!!.hpMilli<hp}
+    }
+    @Test fun leavingAppStopsCombatUntilForegroundReturn() {
+        Assume.assumeTrue(BuildConfig.IS_FIXTURE)
+        val graph=(compose.activity.application as BossApplication).graph
+        graph.setEnabled(true)
+        compose.waitUntil(10_000){graph.combatLoopActive.value}
+        compose.activityRule.scenario.moveToState(androidx.lifecycle.Lifecycle.State.CREATED)
+        compose.waitUntil(10_000){!graph.combatLoopActive.value&&graph.repository.state.value.hero.progress.paused}
+        val stopped=graph.repository.state.value
+        Thread.sleep(1_200)
+        assertEquals(stopped,graph.repository.state.value)
+        compose.activityRule.scenario.moveToState(androidx.lifecycle.Lifecycle.State.RESUMED)
+        compose.waitUntil(10_000){graph.combatLoopActive.value&&graph.repository.state.value.hero.progress.lastReturn!=null}
+        assertTrue(graph.repository.state.value.encounter!!.hpMilli<stopped.encounter!!.hpMilli)
     }
     private fun screenshot(name:String){
         compose.waitForIdle()

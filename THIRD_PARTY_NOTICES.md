@@ -5,6 +5,7 @@
 | 구성요소 | 사용 버전 / 출처 |
 |---|---|
 | Pleos NaviHelper | 3.0.5, [Pleos 개발자 사이트](https://developers.pleos.ai/playground?locale=ko-KR), 공식 Maven 저장소 |
+| Pleos Vehicle SDK | 2.3.2, [Vehicle 공식 문서](https://document.pleos.ai/docs/pleos-only/connect-sdk-pleos/Vehicle/intro), 공식 Maven 저장소 |
 | Android SDK / AndroidX / Compose / Room | API 35, Compose BOM 2024.04.01, Room 2.6.1; [Android Developers](https://developer.android.com/) |
 | Kotlin / kotlinx.coroutines / kotlinx.serialization | 1.9.22 / 1.8.1 / 1.6.3; [Kotlin](https://kotlinlang.org/) |
 | Gradle wrapper / Android Gradle Plugin | 8.10.2 / 8.8.0; [Gradle](https://gradle.org/), Android Developers |

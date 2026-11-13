@@ -5,7 +5,7 @@ if (-not ([IO.Path]::GetFullPath($root).StartsWith('D:\', [StringComparison]::Or
     throw 'Use a checkout under D:\Codex for the Windows helpers.'
 }
 $manifest = Get-Content -LiteralPath (Join-Path $root 'artifacts\build-manifest.json') -Raw | ConvertFrom-Json
-$releaseBase = 'https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.2.0-preview.1'
+$releaseBase = 'https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.3.0-preview.1'
 $folder = Join-Path $root 'artifacts'
 New-Item -ItemType Directory -Path $folder -Force | Out-Null
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12

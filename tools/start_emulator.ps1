@@ -1,4 +1,4 @@
-param([switch]$Visible, [string]$DnsServers = '8.8.8.8,8.8.4.4')
+﻿param([switch]$Visible, [string]$DnsServers = '8.8.8.8,8.8.4.4', [ValidateSet('auto','host','software','swiftshader')][string]$GpuMode = 'auto')
 $ErrorActionPreference = 'Stop'
 $s = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'toolchain-state.json') -Raw | ConvertFrom-Json
 . (Join-Path $PSScriptRoot 'storage.ps1')
@@ -24,7 +24,7 @@ hw.lcd.height=1440
 hw.lcd.density=160
 hw.keyboard=yes
 hw.gpu.enabled=yes
-hw.gpu.mode=host
+hw.gpu.mode=$GpuMode
 hw.gps=yes
 hw.audioInput=yes
 hw.mainKeys=no
@@ -41,7 +41,7 @@ fastboot.forceColdBoot=yes
 $env:ANDROID_AVD_HOME = $avdHome
 $env:ANDROID_HOME = $s.androidSdk
 $env:ANDROID_SDK_ROOT = $s.androidSdk
-$arguments = @('-avd','PleosBoss','-no-snapshot','-no-audio','-port','5554')
+$arguments = @('-avd','PleosBoss','-no-snapshot','-no-audio','-port','5554','-gpu',$GpuMode)
 # Explicit DNS applies only to this emulator; Windows network settings are unchanged.
 if ($DnsServers) { $arguments += @('-dns-server', $DnsServers) }
 if (-not $Visible) { $arguments += @('-no-window','-no-boot-anim') }

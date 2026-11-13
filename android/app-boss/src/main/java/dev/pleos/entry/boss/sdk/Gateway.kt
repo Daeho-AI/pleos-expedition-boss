@@ -3,6 +3,7 @@ package dev.pleos.entry.boss.sdk
 import android.os.SystemClock
 import dev.pleos.boss.game.DrivingInput
 import dev.pleos.boss.game.UxMode
+import dev.pleos.boss.game.DistanceSample
 import kotlinx.coroutines.flow.StateFlow
 
 enum class NavSignal { ARRIVED, DESTINATION_CHANGED }
@@ -31,7 +32,16 @@ data class GatewayState(
     val routeEvents: Long = 0,
     val receivedWhileBackground: Long = 0,
     val lastError: String? = null,
+    val odometerMeters: Long? = null,
+    val odometerAtMs: Long? = null,
+    val odometerStatus: String = "주차 후 확인",
+    val distanceSource: String = "PLEOS_VEHICLE_ODOMETER_KM",
 ) {
+    fun distance(now: Long = SystemClock.elapsedRealtime()): DistanceSample? {
+        val meters = odometerMeters ?: return null
+        val at = odometerAtMs ?: return null
+        return if (now - at in 0..5_000) DistanceSample(meters, at, distanceSource) else null
+    }
     fun input(now: Long = SystemClock.elapsedRealtime(), wall: Long = System.currentTimeMillis()): DrivingInput =
         DrivingInput(now, wall, speedKph, speedAtMs, limitKph, limitAtMs,
             routeGuidance, routeAtMs,
