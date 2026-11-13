@@ -109,7 +109,7 @@ flowchart LR
 
 ## 빌드와 테스트
 
-검증 환경: **Pleos Connect Emulator 2.1.0 / API 34 / x86_64 / RAM 4GB / Cold boot**. 앱 설정은 minSdk 33, compile·targetSdk 35다. JDK 17, Gradle 8.10.2, AGP 8.8.0, Kotlin 1.9.22를 사용한다.
+검증 환경: **Pleos Connect Emulator 2.1.0 / API 34 / x86_64 / 2560×1440 픽셀 / 160dpi / 가로 화면 / RAM 4GB / Cold boot**. 앱 설정은 minSdk 33, compile·targetSdk 35다. JDK 17, Gradle 8.10.2, AGP 8.8.0, Kotlin 1.9.22를 사용한다.
 
 ```powershell
 git clone https://github.com/Daeho-AI/pleos-expedition-boss.git D:\Codex\ExpeditionBoss
