@@ -86,5 +86,5 @@ if args.sdk_report:
 if args.odometer_report:
     data = run("exec-out", "run-as", fixture, "--user", user, "cat", "files/sdk-odometer-0.3.json").stdout
     evidence = json.loads(data)
-    (reports / "sdk-odometer-0.3.json").write_text(json.dumps(evidence, ensure_ascii=False, indent=2), encoding="utf-8")
+    (reports / "sdk-odometer-0.4.json").write_text(json.dumps(evidence, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(evidence, ensure_ascii=False, indent=2))

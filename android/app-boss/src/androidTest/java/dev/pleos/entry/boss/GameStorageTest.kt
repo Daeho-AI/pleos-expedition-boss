@@ -179,6 +179,30 @@ class FixtureJourneyUiTest {
         val hp=graph.repository.state.value.encounter!!.hpMilli
         compose.waitUntil(5_000){graph.repository.state.value.encounter!!.hpMilli<hp}
     }
+    @Test fun previewDoesNotEquipUntilConfirmedAndUpgradeKeepsLoadout() {
+        Assume.assumeTrue(BuildConfig.IS_FIXTURE)
+        val graph=(compose.activity.application as BossApplication).graph
+        val sword=Equipment("twig_blade",Rarity.RARE)
+        val staff=Equipment("night_staff",Rarity.EPIC,2)
+        runBlocking { graph.repository.change { ActionResult(it.copy(
+            hero=it.hero.copy(coins=300,dust=10),equipment=listOf(sword,staff),
+            equipped=mapOf(Slot.WEAPON to sword.key)),"",true) } }
+        compose.onNodeWithTag("nav-equipment").performClick()
+        compose.onNodeWithTag("gear-"+staff.key).performClick()
+        compose.onNodeWithText("밤빛 마법탄").assertExists()
+        assertEquals(sword.key,graph.repository.state.value.equipped[Slot.WEAPON])
+        compose.onNodeWithTag("equip-selected").performScrollTo().performClick()
+        compose.waitUntil(10_000){graph.repository.state.value.equipped[Slot.WEAPON]==staff.key}
+        compose.onNodeWithTag("upgrade-selected").performScrollTo().performClick()
+        compose.waitUntil(10_000){graph.repository.state.value.equipment.first{it.key==staff.key}.upgradeLevel==3}
+        assertEquals(210,graph.repository.state.value.hero.coins)
+        assertEquals(7,graph.repository.state.value.hero.dust)
+        assertEquals(staff.key,graph.repository.state.value.equipped[Slot.WEAPON])
+        screenshot("09-hero-loadout")
+        compose.onNodeWithTag("nav-home").performClick()
+        compose.onNodeWithTag("battle-scene").assertExists()
+        compose.onNodeWithText("밤빛 마법탄  ·  "+graph.balance.template(staff.templateId).name+" +3").assertExists()
+    }
     @Test fun leavingAppStopsCombatUntilForegroundReturn() {
         Assume.assumeTrue(BuildConfig.IS_FIXTURE)
         val graph=(compose.activity.application as BossApplication).graph

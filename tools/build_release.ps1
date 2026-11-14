@@ -1,4 +1,4 @@
-param([string[]]$AdditionalTasks = @())
+﻿param([string[]]$AdditionalTasks = @())
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $config = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'toolchain-state.json') -Raw | ConvertFrom-Json
@@ -18,11 +18,12 @@ try {
     & (Join-Path $config.androidSdk 'build-tools\35.0.0\apksigner.bat') verify --verbose --print-certs $source
     if ($LASTEXITCODE -ne 0) { throw 'Release signature verification failed.' }
     Copy-Item -LiteralPath $source -Destination $destination
+    Copy-Item -LiteralPath $source -Destination (Join-Path $folder '모아_원정보스_release.apk')
     [ordered]@{
         file = [IO.Path]::GetFileName($destination)
         applicationId = 'dev.pleos.entry.boss'
-        versionName = '0.3.0'
-        versionCode = 3
+        versionName = '0.4.0'
+        versionCode = 4
         buildType = 'release'
         debuggable = $false
         bytes = (Get-Item -LiteralPath $destination).Length

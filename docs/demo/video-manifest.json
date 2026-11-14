@@ -1,23 +1,42 @@
 {
-  "appVersion": "0.3.0",
-  "recordedDate": "2026-11-14",
-  "durationSeconds": 90.02,
+  "file": "ExpeditionBoss-90s-Demo.mp4",
+  "bytes": 6250328,
+  "sha256": "620448b80d0ecadec80e5e950bf51e0b8e4f119534907549b616ef69be9d20ed",
+  "duration": "00:01:30.02",
   "resolution": "1920x1080",
-  "language": "ko-KR",
-  "source": "Actual app screen recordings on Pleos Connect Emulator 2.1.0",
-  "drivingDemo": "Explicit fixture input: 7 minutes / 10 km; transition at 0.5x speed",
-  "sdkReading": "Vehicle SDK 2.3.2, actual emulator odometer 0.000 km",
-  "socialDemo": "Two demo accounts, local PC server, accepted ownership exchange",
-  "files": [
-    {
-      "name": "ExpeditionBoss-90s-Demo.mp4",
-      "bytes": 3612302,
-      "sha256": "5a9e5d243078f0a08391696b81cfecc9bd3ae35e64118dfe428087dabb23e562"
-    },
-    {
-      "name": "ExpeditionBoss-90s-Demo.ko.srt",
-      "bytes": 2047,
-      "sha256": "6490c7dc86d2fd21b5b9f8a9775a5ca5d0a7d1f0f031a6e6ffa3c8df8ddd6cb1"
-    }
-  ]
+  "fps": 30,
+  "codec": "H.264 / AAC (silent track)",
+  "decode_errors": "",
+  "inspected_frame_times": [
+    2,
+    6,
+    9,
+    12,
+    15,
+    19,
+    24,
+    29,
+    33,
+    37,
+    43,
+    48,
+    50.6,
+    52,
+    55,
+    60,
+    64,
+    70,
+    76,
+    82,
+    88
+  ],
+  "app_version": "0.4.0",
+  "official_emulator": "Pleos Connect 2.1.0 / API 34",
+  "sdk_recording": "sdk-read.mp4",
+  "sdk_odometer_km": 0.0,
+  "distance_demo": "7 min / 10 km fixture input; driving transition at 0.5x speed",
+  "trade": "Existing completed trade between two demo accounts on local PC server",
+  "audio": "No voice, music or sound effects",
+  "visuals": "Actual Compose game footage; crop/cuts and large Korean captions added in editing",
+  "release": "https://github.com/Daeho-AI/pleos-expedition-boss/releases/tag/v0.4.0-preview.1"
 }

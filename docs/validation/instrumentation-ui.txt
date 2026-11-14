@@ -1,7 +1,7 @@
 INSTRUMENTATION_STATUS: class=dev.pleos.entry.boss.FixtureJourneyUiTest
 INSTRUMENTATION_STATUS: current=1
 INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
-INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: numtests=4
 INSTRUMENTATION_STATUS: stream=
 dev.pleos.entry.boss.FixtureJourneyUiTest:
 INSTRUMENTATION_STATUS: test=leavingAppStopsCombatUntilForegroundReturn
@@ -9,43 +9,57 @@ INSTRUMENTATION_STATUS_CODE: 1
 INSTRUMENTATION_STATUS: class=dev.pleos.entry.boss.FixtureJourneyUiTest
 INSTRUMENTATION_STATUS: current=1
 INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
-INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: numtests=4
 INSTRUMENTATION_STATUS: stream=.
 INSTRUMENTATION_STATUS: test=leavingAppStopsCombatUntilForegroundReturn
 INSTRUMENTATION_STATUS_CODE: 0
 INSTRUMENTATION_STATUS: class=dev.pleos.entry.boss.FixtureJourneyUiTest
 INSTRUMENTATION_STATUS: current=2
 INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
-INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: numtests=4
 INSTRUMENTATION_STATUS: stream=
 INSTRUMENTATION_STATUS: test=drivingHidesCombatStopsLoopAndParkingAutomaticallySettles
 INSTRUMENTATION_STATUS_CODE: 1
 INSTRUMENTATION_STATUS: class=dev.pleos.entry.boss.FixtureJourneyUiTest
 INSTRUMENTATION_STATUS: current=2
 INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
-INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: numtests=4
 INSTRUMENTATION_STATUS: stream=.
 INSTRUMENTATION_STATUS: test=drivingHidesCombatStopsLoopAndParkingAutomaticallySettles
 INSTRUMENTATION_STATUS_CODE: 0
 INSTRUMENTATION_STATUS: class=dev.pleos.entry.boss.FixtureJourneyUiTest
 INSTRUMENTATION_STATUS: current=3
 INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
-INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: numtests=4
 INSTRUMENTATION_STATUS: stream=
-INSTRUMENTATION_STATUS: test=completeJourneyOpenLootAndVisitCollection
+INSTRUMENTATION_STATUS: test=previewDoesNotEquipUntilConfirmedAndUpgradeKeepsLoadout
 INSTRUMENTATION_STATUS_CODE: 1
 INSTRUMENTATION_STATUS: class=dev.pleos.entry.boss.FixtureJourneyUiTest
 INSTRUMENTATION_STATUS: current=3
 INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
-INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: numtests=4
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=previewDoesNotEquipUntilConfirmedAndUpgradeKeepsLoadout
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=dev.pleos.entry.boss.FixtureJourneyUiTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=4
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=completeJourneyOpenLootAndVisitCollection
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.pleos.entry.boss.FixtureJourneyUiTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=4
 INSTRUMENTATION_STATUS: stream=.
 INSTRUMENTATION_STATUS: test=completeJourneyOpenLootAndVisitCollection
 INSTRUMENTATION_STATUS_CODE: 0
 INSTRUMENTATION_RESULT: stream=
 
-Time: 48.636
+Time: 50.509
 
-OK (3 tests)
+OK (4 tests)
 
 
 INSTRUMENTATION_CODE: -1

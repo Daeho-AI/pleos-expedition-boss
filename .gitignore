@@ -42,6 +42,8 @@ docs/validation/*.json
 !docs/validation/sdk-final-route-mode.json
 !docs/validation/unit-tests.json
 !docs/validation/sdk-odometer-0.3.json
+!docs/validation/sdk-odometer-0.4.json
+!docs/validation/sdk-visual-0.4.json
 docs/validation/*.xml
 docs/validation/*.txt
 !docs/validation/instrumentation-storage.txt
@@ -49,3 +51,7 @@ docs/validation/*.txt
 !docs/validation/instrumentation-commerce.txt
 !docs/validation/instrumentation-social.txt
 !docs/validation/instrumentation-odometer.txt
+
+!artifacts/screenshots/visual-battle.png
+!artifacts/screenshots/visual-equipment.png
+!artifacts/screenshots/09-hero-loadout.png

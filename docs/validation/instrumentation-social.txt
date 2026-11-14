@@ -15,7 +15,7 @@ INSTRUMENTATION_STATUS: test=twoIndependentUsersTradeAndDeliverExactlyOnce
 INSTRUMENTATION_STATUS_CODE: 0
 INSTRUMENTATION_RESULT: stream=
 
-Time: 12.012
+Time: 3.077
 
 OK (1 test)
 
