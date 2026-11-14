@@ -6,6 +6,8 @@
 
 **[Windows 시연 ZIP 다운로드](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.3.0-preview.1/ExpeditionBoss-Windows-Demo.zip)** · **[전체 다운로드 / Release](https://github.com/Daeho-AI/pleos-expedition-boss/releases/tag/v0.3.0-preview.1)** · **[SDK 검증 기록](docs/validation/SDK_VALIDATION.md)**
 
+공모전 제출용 APK: **[모아_원정보스_release.apk](apk/모아_원정보스_release.apk)**. 기존 영문 APK와 내용·서명이 같은 0.3.0 파일이다. 심사 기준에 맞춘 사용 시나리오, 현재 구현 범위와 향후 계획은 [공모전 설명](docs/CONTEST.md)을 참고한다.
+
 ![주차 후 확인하는 원정 화면](artifacts/screenshots/01-home.png)
 
 ## 0.3.0 — 복귀 정산과 필살의 일격
