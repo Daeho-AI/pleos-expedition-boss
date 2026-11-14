@@ -8,7 +8,13 @@
 
 공모전 제출용 APK: **[모아_원정보스_release.apk](apk/모아_원정보스_release.apk)**. 기존 영문 APK와 내용·서명이 같은 0.3.0 파일이다. 심사 기준에 맞춘 사용 시나리오, 현재 구현 범위와 향후 계획은 [공모전 설명](docs/CONTEST.md)을 참고한다.
 
-![주차 후 확인하는 원정 화면](artifacts/screenshots/01-home.png)
+## 90초 실행 시연
+
+[![원정 보스 90초 실행 시연 보기](artifacts/screenshots/demo-90s-poster.jpg)](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.3.0-preview.1/ExpeditionBoss-90s-Demo.mp4)
+
+**[영상 보기·다운로드 (MP4, 90초)](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.3.0-preview.1/ExpeditionBoss-90s-Demo.mp4)** · [장면별 설명과 시연 범위](docs/DEMO_VIDEO.md) · [한국어 자막](docs/demo/ExpeditionBoss-90s-Demo.ko.srt)
+
+0.3.0 앱을 공식 Pleos 에뮬레이터에서 실행해 녹화했다. 자동 사냥, 상자 개봉, 장비 강화, 도감·상점, 복귀 필살기, 친구 교환과 실제 SDK 누적거리 수신을 한국어 해설·자막으로 소개한다. **7분·10km 복귀는 가상 입력**, SDK 장면은 별도 앱에서 실제로 받은 **0.000km**다. 친구 교환은 두 시연 계정과 PC 서버로 진행했다.
 
 ## 0.3.0 — 복귀 정산과 필살의 일격
 

@@ -1,0 +1,23 @@
+{
+  "appVersion": "0.3.0",
+  "recordedDate": "2026-11-14",
+  "durationSeconds": 90.02,
+  "resolution": "1920x1080",
+  "language": "ko-KR",
+  "source": "Actual app screen recordings on Pleos Connect Emulator 2.1.0",
+  "drivingDemo": "Explicit fixture input: 7 minutes / 10 km; transition at 0.5x speed",
+  "sdkReading": "Vehicle SDK 2.3.2, actual emulator odometer 0.000 km",
+  "socialDemo": "Two demo accounts, local PC server, accepted ownership exchange",
+  "files": [
+    {
+      "name": "ExpeditionBoss-90s-Demo.mp4",
+      "bytes": 3612302,
+      "sha256": "5a9e5d243078f0a08391696b81cfecc9bd3ae35e64118dfe428087dabb23e562"
+    },
+    {
+      "name": "ExpeditionBoss-90s-Demo.ko.srt",
+      "bytes": 2047,
+      "sha256": "6490c7dc86d2fd21b5b9f8a9775a5ca5d0a7d1f0f031a6e6ffa3c8df8ddd6cb1"
+    }
+  ]
+}
