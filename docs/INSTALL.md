@@ -9,7 +9,7 @@ Windows 자동 설치는 D드라이브를 전제로 한다. 다른 운영체제�
 3. `setup.cmd`를 실행한다. 최초 다운로드는 네트워크에 따라 오래 걸릴 수 있다. 완료 후 게임 창이 열린다.
 4. 다음에는 `demo.cmd`로 실행한다.
 
-이전 버전에서 업데이트할 때도 새 ZIP의 `setup.cmd`를 먼저 실행한다. 이후에는 `demo.cmd`가 서버도 함께 켠다. 기존 가상 기기와 친구 서버의 데이터는 삭제하지 않는다. 같은 종류의 APK끼리 업데이트하면 게임 진행을 유지한다.
+`demo.cmd`를 실행하면 친구 서버도 함께 켜집니다. 기존 가상 기기와 저장된 게임 진행은 유지합니다.
 
 첫 부팅에는 차량 홈 화면과 순정 내비가 준비될 때까지 기다린다. 실행기는 게임이 차량의 앱 영역에 표시되고 전면 상태를 유지하는지 확인한 다음 완료를 알린다.
 
@@ -17,7 +17,7 @@ ZIP에는 Google·현대의 SDK나 에뮬레이터 이미지를 재배포하지 
 
 ## 문제 해결
 
-0.7.0 실행기는 에뮬레이터의 Vulkan을 끈 상태로 시작한다. Windows/Intel 환경에서 발생한 에뮬레이터 실행기 종료를 피하기 위한 설정이며 게임 데이터나 Windows 그래픽 설정은 바꾸지 않는다. 이 환경의 화면 검증은 `-gpu host -feature -Vulkan`로 진행했다. [Android 공식 문제 해결 안내](https://developer.android.com/studio/run/emulator-troubleshooting)를 참고한다.
+실행기는 에뮬레이터의 Vulkan을 끈 상태로 시작한다. Windows/Intel 환경에서 발생한 에뮬레이터 실행기 종료를 피하기 위한 설정이며 게임 데이터나 Windows 그래픽 설정은 바꾸지 않는다. 이 환경의 화면 검증은 `-gpu host -feature -Vulkan`로 진행했다. [Android 공식 문제 해결 안내](https://developer.android.com/studio/run/emulator-troubleshooting)를 참고한다.
 
 | 증상 | 확인할 내용 |
 |---|---|

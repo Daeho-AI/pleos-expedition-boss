@@ -1,189 +1,88 @@
-# 원정 보스 · Expedition Boss
+# 원정 보스
 
-**주행 중에는 멈추고, 주차 후에는 이동한 거리와 기다린 시간을 성장으로 바꾸는 방치형 RPG입니다.**
+**평소의 주행거리를 보스에게 날리는 필살기로 바꾸고, 주차·충전 대기 중에는 사냥과 장비 수집을 즐기는 차량용 방치형 RPG입니다.**
 
-Pleos 차량 화면에서 즐기는 앱입니다. 출발하면 게임 화면과 전투가 중단됩니다. 주차 후 돌아오면 비운 시간의 보상을 받고, 주행거리만큼 강해지는 필살의 일격을 날립니다. 충전하거나 누군가를 기다리는 동안에는 자동 사냥과 장비 육성을 즐길 수 있습니다.
+[**▶ 시연 영상 보기**](https://daeho-ai.github.io/pleos-expedition-boss/) · [**APK 다운로드**](https://github.com/Daeho-AI/pleos-expedition-boss/raw/refs/heads/main/apk/모아_원정보스_release.apk) · [**Windows에서 체험하기**](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/ExpeditionBoss-Windows-Demo.zip)
 
-**[Windows 시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/ExpeditionBoss-Windows-Demo.zip)** · **[APK와 전체 다운로드](https://github.com/Daeho-AI/pleos-expedition-boss/releases/tag/v0.7.0-preview.1)** · [공모전 설명](docs/CONTEST.md)
+[![Pleos 차량 화면에서 실행한 원정 보스](artifacts/screenshots/ui-home-light.png)](https://daeho-ai.github.io/pleos-expedition-boss/)
 
-## 앱 화면 0.7.0
+## 주요 기능
 
-주간·야간 모드는 차량 설정을 따릅니다. 원정 화면에는 현재 캐릭터와 다음 보스, 이동 보너스, 받은 상자만 남겼습니다. 장비는 장착 중인 순서로 정렬하고, 선택하면 외형과 능력치가 바뀌는 모습을 미리 볼 수 있습니다.
+- **주행거리 필살기:** 이동 전후의 차량 누적거리를 비교해, 주차 후 보스에게 강력한 일격을 날립니다. 주행 속도는 보상에 영향을 주지 않습니다.
+- **주행 중 게임 중단:** 출발하면 게임 화면과 소리를 끄고 전투를 멈춥니다. 주차 후 앱으로 돌아오면 비운 시간의 보상을 받고 자동 사냥을 이어갑니다.
+- **보스 사냥과 장비 성장:** 보스를 처치해 상자를 열고 장비를 모읍니다. 장착·강화에 따라 캐릭터 외형과 공격력이 바뀌며, 처치한 보스는 도감에서 확인합니다.
+- **상점:** 게임에서 모은 코인으로 장비, 강화 재료와 도감 조각을 삽니다.
+- **친구 교환:** 서로 필요한 장비를 제안하고, 상대가 내용을 확인해 수락하면 교환합니다.
 
-![차량 화면과 어울리는 원정 화면](artifacts/screenshots/ui-home-light.png)
+자동 사냥과 게임 조작은 **P 기어이고 화면 사용이 허용된 상태에서 앱을 열었을 때** 가능합니다. 충전 중 이용도 이 주차 조건을 따릅니다.
 
-[새 UI 미리보기](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/ExpeditionBoss-UI-Preview.mp4) · [화면 구성과 검증](docs/validation/UPGRADE_0_7.md)
+## SDK와 기술 구조
 
-## 차량에서 사용하는 90초 시연
-
-아래 영상은 0.6.1 화면입니다. 주행 중 중단·이동거리 일격·보상 규칙은 0.7.0에서도 같습니다.
-
-[![주행 중 게임 차단과 주차 후 성장 기능 시연](artifacts/screenshots/demo-90s-poster.jpg)](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.6.1-preview.1/ExpeditionBoss-90s-Demo.mp4)
-
-**[영상 다운로드 (MP4, 90초)](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.6.1-preview.1/ExpeditionBoss-90s-Demo.mp4)** · [장면과 검증 범위](docs/DEMO_VIDEO.md) · [한국어 자막](docs/demo/ExpeditionBoss-90s-Demo.ko.srt)
-
-차량 화면을 유지한 채 **출발 → 게임 중단 → 주차 후 복귀 → 거리 보너스 → 충전·대기 중 성장 → 친구 교환**을 보여 줍니다. 장면마다 핵심 문장 하나를 크게 표시하고 음성은 사용하지 않았습니다. 주행·주차 전환은 실제 SDK 앱, 10km 거리 보너스는 가상 입력으로 구분합니다.
-
-## 차 안에서 이렇게 사용합니다
-
-| 상황 | 앱에서 일어나는 일 |
-|---|---|
-| 주행 시작 | 게임 화면과 조작, 전투를 중단합니다. 운전 중에는 게임을 확인할 필요가 없습니다. |
-| 주차 후 복귀 | 비운 시간의 보상을 정산하고, 차량 누적거리 차이만큼 필살의 일격을 적용합니다. |
-| 충전하거나 기다릴 때 | 주차 상태에서 앱을 열면 자동 사냥이 이어집니다. 보스전에 들어가면 앱 전체가 전투 화면으로 바뀝니다. |
-| 보상과 성장 | 상자를 열어 장비를 모으고 강화합니다. 캐릭터 외형과 공격력이 바뀌며, 게임 코인 상점에서 필요한 재료를 살 수 있습니다. |
-| 친구와 함께 | 서로 필요한 장비를 제안하고, 상대가 수락하면 교환합니다. |
-
-자동 사냥과 모든 게임 조작은 **P 기어·화면 사용 허용·앱 전면 표시**를 확인한 뒤 실행합니다. 충전 대기는 주차 중 사용 예이며, 충전 상태 자동 감지는 현재 구현에 포함하지 않습니다.
-
-## Pleos 차량 데이터 활용
-
-| 데이터와 API | 사용 방법 |
-|---|---|
-| Vehicle SDK 2.3.2 · Odometer | `getOdometer()`로 연결하고 지원 여부를 확인한 뒤 `getCurrentDistanceDriven()`의 누적거리(km)를 읽습니다. 이동 전후의 차이를 복귀 시 일격으로 바꿉니다. |
-| AAOS · `GEAR_SELECTION`과 `CarUxRestrictionsManager` | 주차 여부와 화면 사용 허용을 확인합니다. 주행하거나 상태가 불명확하면 게임을 중단합니다. |
-| NaviHelper 3.0.5 | 내비 연결·안내 상태를 진단 화면에 표시합니다. 보상 조건으로 사용하지 않습니다. |
-
-거리 보너스는 **1km마다 출발 당시 공격력의 2배**, 한 번에 최대 30km와 현재 보스의 남은 체력까지 적용합니다. 기본 복귀 정산은 최대 8시간입니다. 사용한 시간·거리와 보상을 함께 저장해 다시 접속해도 중복 지급하지 않습니다. 속도는 피해량이나 보상 조건이 아닙니다.
-
-12종 장비·4개 등급·+10 강화·20레벨·6종 보스 도감, 상점, 친구·교환을 구현했습니다. 친구 기능은 포함된 PC 서버로 체험할 수 있습니다.
-
-## 0.7.0 변경 내용
-
-- 주간·야간 테마, 중립색 중심의 메뉴, 큰 터치 영역으로 화면을 정리했습니다.
-- 안내 문구와 연결 진단을 설정으로 옮겼습니다. 주행거리 보너스의 자세한 조건은 정보 버튼으로 확인합니다.
-- 보상을 받은 상자와 획득 기록으로 나누고, 장비의 장착·강화·미리보기 흐름을 다듬었습니다.
-- 전투 장면에서는 보스 체력, 캐릭터 장비와 자동 사냥 조작에 집중합니다.
-- 방어구도 기본 공격력과 강화 효과가 자동 사냥에 반영됩니다. 기존 장비와 강화 단계는 유지됩니다.
-- 좁은 창에서는 메뉴와 장비 상세 화면의 배치를 바꿉니다.
-
-[차량 연동 검증](docs/validation/SDK_VALIDATION.md) · [0.7.0 검증](docs/validation/UPGRADE_0_7.md)
-
-공모전 제출용 파일은 **[모아_원정보스_release.apk](apk/모아_원정보스_release.apk)**입니다. 영문 APK와 내용·서명이 같은 0.7.0 파일입니다.
-
-## 설치하고 실행하기
-
-### Windows에서 게임 체험
-
-**준비:** Windows 10/11 x64, [Python 3.11 이상](https://www.python.org/downloads/windows/), 인터넷 연결, 하드웨어 가상화와 Android 에뮬레이터 실행 환경. 메모리 16GB, D드라이브 여유 공간 50GB 이상을 권장한다. 공식 기기 이미지의 압축 해제 크기만 약 20GB다.
-
-1. 위 **Windows 시연 ZIP**을 받아 `D:\Codex\ExpeditionBoss` 같은 폴더에 **압축을 모두 푼다**.
-2. 최초 한 번 `setup.cmd`를 더블클릭한다. 필요한 JDK·Android 도구·공식 Pleos 에뮬레이터 이미지와 친구 서버를 준비하고 게임을 연다. 기존 도구는 재사용한다.
-3. 다음부터는 `demo.cmd`를 더블클릭한다. 친구 서버도 PC에서 자동으로 켜진다. 꺼진 기기를 준비하는 데 PC 상태에 따라 몇 분이 걸릴 수 있다.
-4. 게임의 **설정 → 7분 · 10 km 이동 시연**를 누른다. 주행 중 중단, 복귀 정산, 필살기 적용을 몇 초 안에 체험한다. 시간과 거리는 명시적인 시연 입력이다.
-5. 자동 사냥이 이어지는 동안 **보상 → 장비 → 도감**에서 보상을 열고 육성을 진행한다.
-
-ZIP에는 시연 APK가 포함된다. Git으로 소스를 받은 경우에도 `setup.cmd`가 같은 APK를 Releases에서 내려받아 SHA-256을 확인한다. APK는 Windows 실행 파일이 아니므로 APK만 더블클릭하면 게임이 열리지 않는다.
-
-자동 설치는 D드라이브를 사용한다. 개발 도구는 `D:\Codex\PleosBossToolchain`, 가상 기기는 `D:\Codex\PleosBossEmulator`, 임시 파일은 `D:\Codex\.tmp`에 둔다. 시스템 PATH나 Windows DNS 설정은 바꾸지 않는다. 도구는 공식 배포처에서 내려받으며 Android SDK 설치 시 [SDK 이용약관](https://developer.android.com/studio/terms)에 대한 동의 응답을 전달한다.
-
-오류가 나면 [설치 문제 해결](docs/INSTALL.md)을 확인한다. 실행 기록은 저장소의 `work/launcher-last.log`에 남는다.
-
-### 이미 Pleos 기기가 준비된 개발자
-
-| 파일 | 용도 | 설치 ID |
+| 구성 | 사용하는 기능 | 앱에서 하는 일 |
 |---|---|---|
-| [Daeho-AI_ExpeditionBoss_release.apk](apk/Daeho-AI_ExpeditionBoss_release.apk) | 실제 SDK 사용, 서명된 release 빌드 | `dev.pleos.entry.boss` |
-| [boss-fixture-debug.apk](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/boss-fixture-debug.apk) | 게임 체험, 가상 운행 버튼 제공 | `dev.pleos.entry.boss.fixture` |
-| [boss-pleos-debug.apk](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/boss-pleos-debug.apk) | SDK 진단·개발 도구용 | `dev.pleos.entry.boss` |
-
-시연과 SDK 앱의 저장 공간은 분리된다. SDK debug와 release는 서명이 달라 서로 덮어쓸 수 없다. 새 테스트 기기를 사용한다. 서명키는 저장소에 포함하지 않는다. `release`는 빌드 종류이며 상용 출시 승인을 뜻하지 않는다.
-
-```powershell
-# 연결된 공식 Pleos/AAOS 테스트 기기에 설치
-adb install -r .\apk\Daeho-AI_ExpeditionBoss_release.apk
-```
-
-주차 상태에서 **차량 데이터 권한 확인**을 누르고 필요한 권한을 허용한 뒤 자동 사냥을 켠다. Pleos의 `CAR_DRIVE`는 Manifest에 선언하는 일반 권한이며 별도 승인 팝업을 요청하지 않는다. 실제 거리 지원 여부와 수신값은 **설정 → 차량 연결**에서 확인한다. 에뮬레이터의 차량 데이터 시험에는 [공식 Virtual Console](https://document.pleos.ai/en/docs/connect/guide/getting-started/application-development/use-vehicle-emulator)의 활성 세션이 필요할 수 있다. 게임 체험에는 fixture APK를 선택한다.
-
-## 친구와 교환하는 순서
-
-1. 두 사용자 모두 **친구 → 연결 설정**에서 같은 서버 주소를 입력하고 각자의 닉네임을 만든다.
-2. **친구 → 친구**에서 코드를 보내고, 받은 사람이 수락한다.
-3. **교환함**에 서로 교환할 장비를 맡긴다. 장착 중이면 먼저 장착을 해제한다.
-4. **교환**에서 친구, 내가 줄 장비, 받을 장비를 고르고 제안한다.
-5. 상대가 내용을 확인하고 수락하면 교환함의 소유권이 동시에 바뀐다.
-6. 각자 **교환함 → 가방으로 받기**로 가져와 장착한다.
-
-시연 서버는 PC에서 실행하며 앱의 기본 주소는 `http://10.0.2.2:8765`다. 같은 PC의 에뮬레이터에서 사용할 수 있다. 다른 PC·차량과 인터넷으로 연결하려면 포함된 서버를 HTTPS 주소에 배포해야 한다. 외부 호스팅 계정이나 유료 서버를 자동으로 만들지는 않는다. [서버 연결·배포 안내](server/README.md)를 참고한다.
-
-같은 장비를 받으면 높은 강화 수치를 유지하고 중복분은 강화 가루가 된다. 제안자의 장비는 수락·취소·거절·만료 때까지 교환함에 묶인다. 상대 장비가 다른 교환으로 이동하면 관련 제안은 취소된다.
-
-## 방치형 육성의 흐름
-
-- **6종 보스**를 순서대로 자동 사냥한다. 남은 보스 체력과 성장은 다음 이용으로 이어지며, 주차 중에도 계속 다음 보스와 싸운다.
-- 처치하면 경험치와 상자를 받는다. **장비 12종 × 4등급**, 무기·방어구·장신구 3슬롯을 조합한다.
-- 중복 장비는 강화 가루가 된다. 코인과 가루로 **+10까지 강화**, 캐릭터는 **20레벨**까지 성장한다.
-- 일반 상자 9회 연속 다음에는 희귀 이상이 나온다. 보스별 조각 10개로 도감 미니어처를 해금한다.
-- 같은 상자·강화 요청을 반복해도 중복 지급·결제하지 않도록 저장한다. 종료 후에도 보상과 성장 상태가 유지된다.
-
-| 보상 | 장비 | 도감 |
-|---|---|---|
-| ![상자 보상](artifacts/screenshots/ui-rewards.png) | ![장비 장착](artifacts/screenshots/ui-equipment.png) | ![보스 도감](artifacts/screenshots/ui-collection.png) |
-
-기본 공격력은 레벨과 장비로 결정한다. 게임을 비운 동안 전투를 실행하지 않고, 복귀할 때 저장한 시각과 캐릭터 상태로 결과를 계산한다. 같은 부팅 안에서는 단조 증가 시계를 사용하고, 기기를 재부팅하면 벽시계 경과 시간을 상한 내에서 사용한다. 시간을 뒤로 돌린 구간에는 보상을 추가하지 않는다. 이는 로컬 저장 방식이며 서버 기반 부정행위 방지를 완성한 것은 아니다. 장비 변경과 상자 개봉은 **P 기어 + UX 제한 해제** 상태에서만 가능하다.
-
-## 사용하는 SDK와 실제 데이터
-
-| 데이터 | API | 게임에서의 역할 |
-|---|---|---|
-| 누적 주행거리 | Vehicle SDK 2.3.2 `getOdometer()` → `checkCurrentDistanceDrivenCapabilities()` → `getCurrentDistanceDriven()` | 주차 상태에서 읽은 km 값의 차이로 복귀 필살기 계산. 권한 `pleos.car.permission.CAR_DRIVE` |
-| 순정 내비 안내 상태 | NaviHelper 3.0.5 `getRouteStateInfo()` / `onRouteStateInfo()` | 주차 중 연결 화면에 실제 안내 상태 표시. 전투 조건으로 사용하지 않음 |
-| 도로 제한속도 | NaviHelper `onCurrentRoadSpeedLimit(Int)` | 연결 진단용. 전투·보상 조건으로 사용하지 않음 |
-| 차량 속도 | AAOS `CarPropertyManager` / `PERF_VEHICLE_SPEED` | 주차 중 읽기 전용 진단. 공격 배율에 사용하지 않음 |
-| 기어 | AAOS `GEAR_SELECTION` | 주차 여부 확인, 읽기 전용 |
-| 운전자 화면 제한 | `CarUxRestrictionsManager` | 주행 중 게임 화면과 전투 실행 모두 중단 |
-
-Pleos 전용 SDK는 **Vehicle과 NaviHelper**를 사용한다. Vehicle 2.3.2의 공식 소스 문서에서 누적거리 단위가 km임을 확인했다. 거리 API는 지원 범위 확인 후 읽기만 수행하며, 주행 중 거리 콜백이나 위치 추적을 실행하지 않는다. 앱을 떠나면 SDK 연결을 해제한다. 속도·기어는 AAOS 공개 차량 API를 사용한다. 조명·차량 속도·기어 제어, 경로 쓰기, 순정 지도 오버레이는 사용하지 않는다.
-
-상점은 게임에서 획득한 코인만 사용하며 현금 결제·광고는 없다. 게임 진행, 정산 시각과 사용한 누적거리는 기기 내부 Room DB에 저장한다. 친구 프로필과 교환함은 선택한 친구 서버에 저장된다. 친구 서버로 보내는 정보는 닉네임·친구 관계·맡긴 장비·교환 내역이다. 누적거리·차량 속도·좌표·이동 경로는 보내지 않는다.
+| **Pleos Vehicle SDK 2.3.2** | `getOdometer()` → 지원 여부 확인 → `getCurrentDistanceDriven()` | 주차 중 누적 주행거리(km)를 읽고, 이동 전후의 차이를 필살기 피해량으로 바꿉니다. |
+| **Android Automotive** | `GEAR_SELECTION`, `CarUxRestrictionsManager` | 주차 여부와 화면 사용 제한을 확인합니다. 주행하거나 상태를 확인할 수 없으면 게임을 중단합니다. |
+| **Pleos NaviHelper 3.0.5** | `getRouteStateInfo()`, `onRouteStateInfo()` | 설정의 차량 연결 화면에서 순정 내비 안내 상태를 확인합니다. |
+| **Kotlin·Compose / Room** | 게임 화면, 기기 내 저장 | 자동 사냥·장비·보상을 처리하고, 정산한 시간과 거리를 함께 저장해 중복 지급을 막습니다. |
+| **Python·SQLite 서버** | 친구 관계, 교환함, 교환 수락 | 두 사용자의 동의를 확인하고 장비 소유권을 함께 변경합니다. |
 
 ```mermaid
 flowchart LR
-    A[주차 시 Vehicle 누적거리 조회] --> G[복귀 정산과 필살기]
-    B[AAOS 기어·화면 제한과 앱 전면 상태] --> C[주차 중 자동 전투]
-    G --> D[Room 저장]
-    C --> D[Room 저장]
-    D --> E[전투·상자·장비·상점·교환]
+  V[Vehicle SDK 누적거리] --> R[주차 후 필살기]
+  A[기어·화면 제한] --> P[주차 중 자동 사냥]
+  T[앱을 비운 시간] --> B[복귀 보상]
+  R --> S[Room 저장]
+  P --> S
+  B --> S
+  S --> G[상자·장비·도감]
+  G <-->|장비 교환| F[친구 서버]
 ```
 
-## 빌드와 테스트
+차량 데이터는 읽기만 합니다. 게임을 비운 동안에는 전투를 실행하지 않고, 돌아왔을 때 최대 8시간의 보상을 계산합니다. 주행거리 보너스는 한 번에 최대 30km, 현재 보스의 남은 체력까지 적용합니다. 내비 안내 여부는 보상 조건에 포함하지 않습니다.
 
-검증 환경: **Pleos Connect Emulator 2.1.0 / API 34 / x86_64 / 2560×1440 픽셀 / 160dpi / 가로 화면 / RAM 4GB / Cold boot**. 앱 설정은 minSdk 33, compile·targetSdk 35다. JDK 17, Gradle 8.10.2, AGP 8.8.0, Kotlin 1.9.22를 사용한다.
+차량의 좌표·이동 경로를 수집하지 않으며, 누적거리도 친구 서버로 보내지 않습니다. 친구 서버에는 닉네임, 친구 관계, 교환할 장비와 교환 내역을 저장합니다.
+
+## 실행 방법
+
+### Windows에서 체험
+
+1. [시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/ExpeditionBoss-Windows-Demo.zip)을 받아 `D:\Codex\ExpeditionBoss`에 압축을 풉니다.
+2. Python 3.11 이상을 설치한 뒤 `setup.cmd`를 실행합니다. Pleos 에뮬레이터와 필요한 도구를 준비하고 게임을 엽니다.
+3. 다음부터는 `demo.cmd`로 실행합니다. 친구 서버도 PC에서 함께 실행됩니다.
+4. 게임의 **설정 → 7분 · 10 km 이동 시연**에서 주행 중 중단, 복귀 보상과 필살기를 체험합니다. 이 버튼의 시간·거리는 가상 입력입니다.
+
+Windows 10/11 x64, 하드웨어 가상화, 인터넷 연결이 필요합니다. 메모리 16GB와 D드라이브 여유 공간 50GB 이상을 권장합니다. [자세한 설치 안내](docs/INSTALL.md)
+
+### Pleos 에뮬레이터에 직접 설치
+
+[apk/모아_원정보스_release.apk](apk/모아_원정보스_release.apk)는 실제 Pleos SDK를 사용하는 서명된 설치 파일입니다.
 
 ```powershell
-git clone https://github.com/Daeho-AI/pleos-expedition-boss.git D:\Codex\ExpeditionBoss
-cd D:\Codex\ExpeditionBoss
-
-# 도구 준비. --pleos-image를 생략하면 기기 이미지를 받지 않는다.
-python .\tools\bootstrap_android.py --pleos-image
-
-# 전투 규칙 테스트 + 시연/SDK debug APK
-powershell -ExecutionPolicy Bypass -File .\tools\build.ps1
-powershell -ExecutionPolicy Bypass -File .\tools\package.ps1
-
-# 자신의 로컬 키로 release 빌드
-python .\tools\prepare_release_signing.py
-powershell -ExecutionPolicy Bypass -File .\tools\build_release.ps1
+adb install -r .\apk\모아_원정보스_release.apk
 ```
 
-현재 화면·방어구 성장 변경의 검증 범위는 [0.7.0 검증 기록](docs/validation/UPGRADE_0_7.md), 전투 전환은 [0.6.0 기록](docs/validation/UPGRADE_0_6.md), 복귀 정산·필살기는 [0.3.0 기록](docs/validation/UPGRADE_0_3.md), 이전 상점·친구·교환 시험은 [0.2.0 기록](docs/validation/UPGRADE_0_2.md)에 정리한다. 차량 API의 버전별 연결 기록은 [SDK 검증 기록](docs/validation/SDK_VALIDATION.md)에 있다. SDK 다운로드·저장소 접근 조건이 변경되면 [Pleos 개발자 사이트](https://developers.pleos.ai/playground?locale=ko-KR)의 현재 안내를 따른다.
+주차 상태에서 앱을 열고 **차량 데이터 권한 확인**을 누른 뒤 자동 사냥을 켭니다. **설정 → 차량 연결**에서 데이터 수신 여부를 확인할 수 있습니다. 차량 데이터 시험에는 공식 Virtual Console의 활성 세션이 필요할 수 있습니다. 일반 휴대폰에서는 Pleos SDK를 사용할 수 없습니다.
 
-| 소스 | 역할 |
-|---|---|
-| `android/core-game` | 전투·보상·장비 규칙과 단위 테스트 |
-| `android/app-boss/src/main/java/dev/pleos/entry/boss/sdk` | 실제 SDK / 명시적 가상 입력 |
-| `android/app-boss/src/main/java/dev/pleos/entry/boss/data` | Room 저장과 중복 요청 처리 |
-| `android/app-boss/src/main/java/dev/pleos/entry/boss/ui` | 원정·상자·장비·상점·친구·도감·연결 화면 |
-| `android/app-boss/src/main/java/dev/pleos/entry/boss/social` | 친구 서버 통신과 장비 전송·수령 복구 |
-| `android/app-boss/src/main/assets/balance.json` | 게임 수치 |
-| `tools` | Windows 설치·실행·빌드·검증 |
-| `server` | 친구 관계·교환함·원자적 교환을 처리하는 Python/SQLite 서버 |
+친구 교환은 두 사용자가 같은 서버에 연결해야 합니다. Windows 시연 앱은 같은 PC의 서버(`http://10.0.2.2:8765`)를 이용합니다. 제출용 release 앱에는 HTTPS 서버 주소를 입력해야 하며, 공개 운영 서버는 제공하지 않습니다. [친구 서버 실행·연결 안내](server/README.md)
 
-## 현대 공모전 기준과의 연결
+## 테스트 환경
 
-공식 [제출 안내](https://appdevchallenge.auto-hmg.io/guide/submission)가 요구하는 **앱 이름·한 줄 소개, 실행 방법, 테스트 환경·설정, APK 위치**를 정리했다. 소스와 서명된 release APK를 함께 제공하며, [심사 기준](https://appdevchallenge.auto-hmg.io/guide/judging-awards)의 차량특화성·창의성·기술 활용성·사업성에 대한 설명은 [공모전 대응 문서](docs/CONTEST.md)에 있다.
+- Pleos Connect 에뮬레이터 **2.1.0**, Android 14 / API 34, x86_64
+- 화면 **2560 × 1440, 160 dpi**, 가로 화면, RAM 4GB
+- Windows, Cold boot, 앱 전체 창과 분할 창
+- 확인한 기능: 차량 데이터 수신, 주행 중 게임 중단, 주차 후 복귀, 상자 개봉, 장비 장착·강화, 상점과 친구 교환
+- 거리 보너스의 반복 시험은 가상 입력으로 수행하며 SDK 수신 시험과 구분합니다.
 
-주행 중 상점·교환을 포함한 게임 화면을 숨기고 전투 실행도 중단한다. [공식 운전자 주의 분산 가이드](https://document.pleos.ai/docs/pleos-only/distribute/app-review-guide/review-driver-distraction-elements)를 기준으로 설계했으며, 공모전 수상이나 앱 마켓 승인 여부가 확정된 것은 아니다.
+[차량 SDK 확인 기록](docs/validation/SDK_VALIDATION.md) · [게임 화면·기능 확인 기록](docs/validation/UPGRADE_0_7.md)
 
-이 저장소 공개는 공모전 접수나 앱 마켓 등록 자체를 대신하지 않는다. 외부 구성요소는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)를 참조한다.
+## 소스 구성
+
+```text
+android/app-boss/  차량 앱 · Pleos SDK 연동 · 화면 · 저장
+android/core-game/ 전투 · 보상 · 장비 · 복귀 정산 규칙
+server/           친구 관계 · 교환함 · 장비 교환
+apk/              제출용 release APK
+tools/            설치 · 실행 · 빌드 · 검증 도구
+```
+
+[소스 빌드](docs/DEVELOPMENT.md) · [기획과 발전 계획](docs/CONTEST.md) · [외부 구성요소](THIRD_PARTY_NOTICES.md)
