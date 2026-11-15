@@ -19,7 +19,7 @@ import kotlin.math.sin
         drawCircle(Brush.radialGradient(listOf(tint.copy(alpha=.15f),Color.Transparent)),size.minDimension*.48f)
         withTransform({translate(size.width/2,size.height*.94f);scale(s,s,Offset.Zero)}){
             drawOval(Color.Black.copy(alpha=.25f),Offset(-140f,-6f),Size(280f,20f))
-            drawMonster(index,0f)
+            pixelMonster(index,0f,10f)
         }
         if(muted)drawRect(Night.copy(alpha=.7f))
     }

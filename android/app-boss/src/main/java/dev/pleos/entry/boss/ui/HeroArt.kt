@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.drawscope.*
 import dev.pleos.boss.game.*
 import kotlin.math.*
 
-internal enum class WeaponMotion(val title: String) { BLADE("새싹 연속 베기"), HAMMER("모래 분쇄"), SPEAR("별빛 돌진"), STAFF("밤빛 마법탄") }
+internal enum class WeaponMotion(val title: String) { BLADE("새싹 에너지파"), HAMMER("모래 파동"), SPEAR("별빛 관통탄"), STAFF("밤빛 마법탄") }
 internal data class HeroLook(val weapon: Equipment?, val armor: Equipment?, val charm: Equipment?, val level: Int) {
     val motion get() = when(weapon?.templateId) { "sand_hammer" -> WeaponMotion.HAMMER; "star_spear" -> WeaponMotion.SPEAR; "night_staff" -> WeaponMotion.STAFF; else -> WeaponMotion.BLADE }
     val accent get() = when(motion) { WeaponMotion.BLADE -> Color(0xFF88F4C0); WeaponMotion.HAMMER -> Color(0xFFFFC879); WeaponMotion.SPEAR -> Color(0xFF9AE9FF); WeaponMotion.STAFF -> Color(0xFFC2AAFF) }
@@ -26,66 +26,9 @@ internal fun DrawScope.plate(color: Color, x: Float,y: Float,w: Float,h: Float,r
     drawLine(color.copy(alpha=.7f),Offset(x+6,y+4),Offset(x+w-6,y+4),2f)
 }
 
-/** A layered paper doll. Every visual item comes from the equipped inventory. */
-internal fun DrawScope.drawAdventurer(look: HeroLook, time: Float, swing: Float=0f, guard: Float=0f, ultimate: Float=0f) {
-    val accent=look.accent;val armor=look.armorColor;val breathe=sin(time*2.4f)*2f
-    val dark=Color(0xFF1C302C);val skin=Color(0xFFE8BC93)
-    if(look.aura>0 || ultimate>0f) {
-        val a=.08f+look.aura*.035f+ultimate*.18f
-        drawCircle(Brush.radialGradient(listOf(accent.copy(alpha=a),Color.Transparent),Offset(0f,-110f),160f),160f,Offset(0f,-110f))
-        if(look.aura>=2)for(i in 0..7){val angle=time*.6f+i*PI.toFloat()/4;drawCircle(accent.copy(alpha=.5f),2f,Offset(cos(angle)*70f,-100f+sin(angle)*95f))}
-    }
-    // Cape and boots sit behind the torso; their movement follows the attack pose.
-    val cape=Path().apply {moveTo(-24f,-177f+breathe);cubicTo(-60f,-151f,-53f,-95f,-87f-swing*24f,-45f);lineTo(-47f,-57f);lineTo(-20f,-35f);cubicTo(5f,-86f,20f,-140f,16f,-172f);close()}
-    outlined(cape,if(look.armor?.templateId=="cloud_robe")Color(0xFF88BACB) else armor.copy(red=armor.red*.55f,green=armor.green*.65f,blue=armor.blue*.62f))
-    drawPath(cape,Brush.horizontalGradient(listOf(Color.White.copy(alpha=.10f),Color.Transparent),-75f,0f))
-    rotate(-10f-swing*17f,Offset(-18f,-76f)) { plate(armor,-36f,-87f,29f,60f);plate(dark,-40f,-34f,44f,30f,9f);drawLine(accent.copy(alpha=.5f),Offset(-34f,-13f),Offset(-6f,-13f),3f) }
-    rotate(8f+swing*24f,Offset(20f,-79f)) { plate(armor,4f,-86f,31f,62f);plate(dark,3f,-32f,48f,29f,9f);drawLine(accent.copy(alpha=.5f),Offset(11f,-11f),Offset(43f,-11f),3f) }
-    translate(guard*-8f,breathe) {
-        // Back arm and shield.
-        rotate(guard*-25f,Offset(-35f,-157f)) { plate(armor,-63f,-161f,29f,63f,14f);drawCircle(skin,12f,Offset(-48f,-102f)) }
-        outlined(shape(-72f,-145f,-29f,-147f,-24f,-109f,-48f,-84f,-75f,-111f),armor)
-        drawPath(shape(-65f,-138f,-36f,-139f,-33f,-113f,-48f,-96f,-66f,-113f),accent.copy(alpha=.25f))
-        drawLine(Color(0xFFEDD69A),Offset(-49f,-137f),Offset(-49f,-106f),4f)
-        // Armor changes both colour and silhouette, not just an icon.
-        val robe=look.armor?.templateId=="cloud_robe"
-        outlined(shape(-34f,-171f,28f,-174f,40f,-103f,if(robe)53f else 33f,if(robe)-47f else -78f,if(robe)-47f else -35f,if(robe)-47f else -78f,-41f,-108f),armor)
-        drawPath(shape(-24f,-163f,12f,-164f,24f,-113f,-20f,-112f),Brush.verticalGradient(listOf(Color.White.copy(alpha=.18f),Color.Transparent),-164f,-100f))
-        plate(Color(0xFF68533B),-40f,-99f,81f,16f,4f)
-        drawRoundRect(Color(0xFFEBC784),Offset(-7f,-98f),Size(19f,16f),CornerRadius(3f,3f),style=Stroke(3f))
-        if(look.armor?.templateId=="shell_mail")for(i in 0..2)drawArc(Color(0xFFEFCA89),0f,180f,false,Offset(-28f,-156f+i*18f),Size(53f,22f),style=Stroke(2f))
-        if(look.armor?.templateId=="iron_plate"){outlined(shape(-52f,-172f,-28f,-185f,-10f,-165f,-24f,-147f,-51f,-148f),armor);outlined(shape(20f,-177f,50f,-176f,59f,-151f,29f,-148f),armor)}
-        drawCircle(Color(0xFFFFD98B),7f,Offset(-4f,-143f));drawCircle(accent,3.5f,Offset(-4f,-144f))
-        // Hair, face and scarf give the adventurer an identity even with starter gear.
-        drawCircle(dark,43f,Offset(-1f,-206f))
-        drawRoundRect(skin,Offset(-25f,-235f),Size(62f,57f),CornerRadius(22f,22f))
-        outlined(shape(-40f,-218f,-32f,-247f,-6f,-261f,24f,-247f,47f,-223f,17f,-226f,12f,-242f,-1f,-224f,-18f,-230f,-20f,-208f),Color(0xFF27352C))
-        drawLine(Color(0xFF815D39),Offset(-25f,-242f),Offset(-6f,-251f),5f,StrokeCap.Round)
-        drawRoundRect(Color(0xFF23362F),Offset(15f,-213f),Size(6f,13f),CornerRadius(3f,3f))
-        drawCircle(Color.White,1.6f,Offset(17f,-211f))
-        drawLine(Color(0xFF98714F),Offset(24f,-192f),Offset(30f,-193f),2f,StrokeCap.Round)
-        outlined(shape(-29f,-181f,24f,-181f,31f,-166f,-16f,-166f,-39f,-174f),accent)
-        outlined(shape(-31f,-177f,-70f-sin(time*3)*8f,-185f,-63f-sin(time*3)*8f,-166f,-27f,-165f),accent.copy(alpha=.8f))
-        if(look.level>=10){drawPath(shape(-20f,-245f,12f,-251f,22f,-239f,-15f,-231f),Color(0xFFE0B96C));drawCircle(accent,4f,Offset(4f,-242f))}
-        // Front arm winds up, swings and recovers in a readable arc.
-        val angle=when(look.motion){WeaponMotion.STAFF -> -14f-swing*20;WeaponMotion.SPEAR->-18f+swing*11;WeaponMotion.HAMMER->-85f+swing*143;else->-53f+swing*105}
-        rotate(angle,Offset(32f,-152f)) {
-            plate(armor,24f,-162f,28f,64f,13f)
-            drawCircle(skin,13f,Offset(41f,-99f))
-            val weaponAngle=when(look.motion){WeaponMotion.HAMMER->75f;WeaponMotion.SPEAR->75f-angle;WeaponMotion.STAFF->8f-angle;else->-24f}
-            translate(44f,-105f){rotate(weaponAngle,Offset.Zero){drawWeapon(look.weapon?.templateId?:"twig_blade",accent,look.weapon?.upgradeLevel?:0,time)}}
-            plate(armor,25f,-121f,29f,19f,6f)
-        }
-    }
-    look.charm?.let { charm ->
-        val cx=-88f+sin(time*1.3f)*9f;val cy=-218f+sin(time*2.1f)*9f
-        val cc=when(charm.templateId){"moss_charm"->Color(0xFF9AE5B2);"whale_charm"->Color(0xFF93DFF9);"dragon_charm"->Color(0xFFD0A0FF);else->Color(0xFFFFDA8C)}
-        drawCircle(Brush.radialGradient(listOf(cc.copy(alpha=.35f),Color.Transparent),Offset(cx,cy),38f),38f,Offset(cx,cy))
-        translate(cx,cy) {
-            if(charm.templateId=="lantern_charm"){drawRoundRect(cc,Offset(-12f,-18f),Size(24f,32f),CornerRadius(6f,6f));drawLine(dark,Offset(-10f,-9f),Offset(10f,-9f),3f);drawArc(cc,-180f,180f,false,Offset(-8f,-27f),Size(16f,15f),style=Stroke(3f))}
-            else {drawOval(cc,Offset(-21f,-15f),Size(42f,32f));drawPath(shape(-14f,8f,-22f,22f,1f,13f),cc);drawCircle(dark,3f,Offset(8f,-3f));if(charm.templateId=="dragon_charm"){drawPath(shape(-8f,-9f,-16f,-29f,4f,-14f),cc);drawPath(shape(-14f,1f,-36f,-13f,-29f,13f),cc.copy(alpha=.65f))}}
-        }
-    }
+/** Pixel layers are derived from the equipped inventory, including armor and charm. */
+internal fun DrawScope.drawAdventurer(look:HeroLook,time:Float,swing:Float=0f,guard:Float=0f,ultimate:Float=0f){
+    pixelHero(look,time,7f,ultimate)
 }
 
 internal fun DrawScope.drawWeapon(id: String, tint: Color, upgrade: Int=0, time: Float=0f) {
@@ -102,14 +45,13 @@ internal fun DrawScope.drawWeapon(id: String, tint: Color, upgrade: Int=0, time:
     if(upgrade>=5)for(i in 0..3){val yy=-20f-((time*28+i*30)%130);drawCircle(tint.copy(alpha=.7f),2f,Offset(sin(time*3+i)*22,yy))}
 }
 
-@Composable internal fun HeroPortrait(game: GameState,modifier: Modifier=Modifier) {
+@Composable internal fun HeroPortrait(game:GameState,modifier:Modifier=Modifier){
     val look=heroLook(game)
-    Canvas(modifier) {
-        val longWeapon=look.motion==WeaponMotion.SPEAR
-        val s=minOf(size.width/(if(longWeapon)380f else 260f),size.height/330f)
-        val anchor=size.width*(if(longWeapon).36f else .53f)
-        withTransform({translate(anchor,size.height*.93f);scale(s,s,Offset.Zero)}){
-            drawOval(Color.Black.copy(alpha=.35f),Offset(-70f,-4f),Size(150f,18f));drawAdventurer(look,0f)
+    Canvas(modifier){
+        val unit=maxOf(2f,floor(minOf(size.width/46f,size.height/38f)))
+        translate(size.width*.48f,size.height*.93f){
+            drawRect(Color(0xFF0A1321),Offset(-14*unit,unit),Size(30*unit,2*unit))
+            pixelHero(look,0f,unit)
         }
     }
 }

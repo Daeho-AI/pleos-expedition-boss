@@ -217,6 +217,21 @@ class FixtureJourneyUiTest {
         compose.waitUntil(10_000){graph.combatLoopActive.value&&graph.repository.state.value.hero.progress.lastReturn!=null}
         assertTrue(graph.repository.state.value.encounter!!.hpMilli<stopped.encounter!!.hpMilli)
     }
+    @Test fun compactVehiclePanelCanExpandWithoutChangingEquipment() {
+        Assume.assumeTrue(BuildConfig.IS_FIXTURE)
+        val graph=(compose.activity.application as BossApplication).graph
+        val equipped=graph.repository.state.value.equipped
+        compose.onNodeWithTag("vehicle-journey-card").assertExists()
+        val compactWidth=compose.onNodeWithTag("battle-scene").fetchSemanticsNode().boundsInRoot.width
+        val rootWidth=compose.onRoot().fetchSemanticsNode().boundsInRoot.width
+        assertTrue("The mini encounter must leave vehicle context visible",compactWidth<rootWidth*.5f)
+        compose.onNodeWithTag("toggle-panel-size").performScrollTo().performClick()
+        compose.waitUntil(5_000){compose.onNodeWithTag("battle-scene").fetchSemanticsNode().boundsInRoot.width>compactWidth}
+        assertEquals(equipped,graph.repository.state.value.equipped)
+        compose.onNodeWithTag("toggle-panel-size").performScrollTo().performClick()
+        compose.waitUntil(5_000){compose.onNodeWithTag("battle-scene").fetchSemanticsNode().boundsInRoot.width==compactWidth}
+        screenshot("10-vehicle-mini-panel")
+    }
     private fun screenshot(name:String){
         compose.waitForIdle()
         val file=File(compose.activity.filesDir,"screenshots/"+name+".png")

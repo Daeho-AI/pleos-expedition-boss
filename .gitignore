@@ -55,3 +55,8 @@ docs/validation/*.txt
 !artifacts/screenshots/visual-battle.png
 !artifacts/screenshots/visual-equipment.png
 !artifacts/screenshots/09-hero-loadout.png
+!artifacts/screenshots/10-vehicle-mini-panel.png
+!artifacts/screenshots/pixel-vehicle-wide.png
+!artifacts/screenshots/pixel-vehicle-split.png
+!docs/validation/sdk-visual-0.5.json
+!docs/validation/lint-0.5.txt

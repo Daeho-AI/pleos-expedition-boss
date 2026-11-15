@@ -32,12 +32,12 @@ import kotlinx.coroutines.delay
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
-internal val Night=Color(0xFF0B1717)
-internal val Panel=Color(0xFF162625)
-internal val Edge=Color(0xFF30443F)
+internal val Night=Color(0xFF101824)
+internal val Panel=Color(0xFF192536)
+internal val Edge=Color(0xFF2B3C50)
 internal val Gold=Color(0xFFE8BD73)
-internal val Muted=Color(0xFFA0B5AE)
-internal val Mint=Color(0xFF9CDBB6)
+internal val Muted=Color(0xFFA7B8CA)
+internal val Mint=Color(0xFF9DD6E5)
 private val Ink=Color(0xFFEDF0F5)
 internal fun rarityColor(r:Rarity)=when(r){Rarity.COMMON->Color(0xFFA7B7C7);Rarity.RARE->Color(0xFF7CB9F0);Rarity.EPIC->Color(0xFFC197EF);Rarity.LEGENDARY->Gold}
 internal fun rarityName(r:Rarity)=when(r){Rarity.COMMON->"일반";Rarity.RARE->"희귀";Rarity.EPIC->"영웅";Rarity.LEGENDARY->"전설"}
@@ -73,7 +73,7 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
         else snackbar.currentSnackbarData?.dismiss()
     }
     MaterialTheme(
-        colorScheme=darkColorScheme(primary=Gold,onPrimary=Night,secondary=Mint,background=Night,surface=Panel,onSurface=Ink,onBackground=Ink,outline=Edge),
+        colorScheme=darkColorScheme(primary=Mint,onPrimary=Night,secondary=Gold,background=Night,surface=Panel,onSurface=Ink,onBackground=Ink,outline=Edge),
         typography=Typography(bodyLarge=androidx.compose.ui.text.TextStyle(fontSize=18.sp,lineHeight=28.sp),bodyMedium=androidx.compose.ui.text.TextStyle(fontSize=16.sp,lineHeight=24.sp)),
     ){
         Scaffold(containerColor=Night,snackbarHost={if(foreground&&ux==UxMode.PARKED_INTERACTIVE)SnackbarHost(snackbar)}){padding->
@@ -86,8 +86,9 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
             }else{
                 BoxWithConstraints(Modifier.fillMaxSize().padding(padding)){
                     val wide=maxWidth>=850.dp
+                    val compactHeader=maxWidth<680.dp
                     Column(Modifier.fillMaxSize()){
-                        Header(game,BuildConfig.IS_FIXTURE)
+                        Header(game,BuildConfig.IS_FIXTURE,compactHeader)
                         if(!wide) Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal=12.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)){
                             tabs.forEach{tab->FilterChip(selected=screen==tab.id,onClick={screen=tab.id},label={Text(tab.label)},modifier=Modifier.heightIn(min=64.dp).testTag("nav-"+tab.id))}
                         }
@@ -104,7 +105,7 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
                             }
                             Box(Modifier.weight(1f).fillMaxHeight().padding(if(wide)22.dp else 16.dp)){
                                 when(screen){
-                                    "home"->JourneyScreen(game,graph,status,wide,{screen=it},playing,shownStrikeId,{shownStrikeId=it})
+                                    "home"->JourneyScreen(game,graph,status,{screen=it},playing,shownStrikeId,{shownStrikeId=it},gateway)
                                     "chests"->ChestScreen(game,graph,busy)
                                     "equipment"->GearStudio(game,graph,busy)
                                     "shop"->ShopScreen(game,graph,busy)
@@ -121,17 +122,19 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
         }
     }
 }
-@Composable private fun Header(game:GameState,fixture:Boolean){
-    Row(Modifier.fillMaxWidth().padding(horizontal=32.dp,vertical=22.dp),verticalAlignment=Alignment.CenterVertically){
-        Icon(Icons.Default.AutoAwesome,null,tint=Gold,modifier=Modifier.size(30.dp))
+@Composable private fun Header(game:GameState,fixture:Boolean,compact:Boolean){
+    Column(Modifier.fillMaxWidth().padding(horizontal=if(compact)16.dp else 32.dp,vertical=22.dp)){
+    Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){
+        Icon(Icons.Default.DirectionsCar,null,tint=Mint,modifier=Modifier.size(30.dp))
         Spacer(Modifier.width(12.dp))
-        Column{Text("원정 보스",fontSize=26.sp,fontWeight=FontWeight.Bold);Text("여정이 끝나면, 모험이 시작된다",fontSize=12.sp,letterSpacing=0.sp,color=Muted)}
-        Spacer(Modifier.width(20.dp))
-        BadgePill(if(fixture)"시연 데이터 · 차량 연결 아님" else "PLEOS · 차량 데이터",if(fixture)Gold else Mint)
+        Column{Text("원정 보스",fontSize=26.sp,fontWeight=FontWeight.Bold);Text("Pleos Connect용 차량 게임",fontSize=12.sp,letterSpacing=0.sp,color=Muted)}
+        if(!compact){Spacer(Modifier.width(20.dp));BadgePill(if(fixture)"시연 데이터 · 차량 연결 아님" else "PLEOS · 차량 데이터",if(fixture)Gold else Mint)}
         Spacer(Modifier.weight(1f))
         Money(Icons.Default.Toll,game.hero.coins.toString(),Gold)
         Spacer(Modifier.width(20.dp))
         Money(Icons.Default.AutoAwesome,game.hero.dust.toString(),Color(0xFFC197EF))
+    }
+    if(compact){Spacer(Modifier.height(10.dp));BadgePill(if(fixture)"시연 데이터 · 차량 연결 아님" else "PLEOS · 차량 데이터",if(fixture)Gold else Mint)}
     }
 }
 @Composable private fun Money(icon:ImageVector,value:String,color:Color){Row(verticalAlignment=Alignment.CenterVertically){Icon(icon,null,tint=color,modifier=Modifier.size(21.dp));Spacer(Modifier.width(7.dp));Text(value,fontSize=20.sp,fontWeight=FontWeight.SemiBold)}}
