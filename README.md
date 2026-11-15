@@ -4,17 +4,17 @@
 
 현대자동차그룹 차량용 앱 개발 공모전을 준비하는 Pleos/Android Automotive 프로토타입이다. 주행 중에는 전투 실행과 게임 화면을 중단한다. 주차 후 게임으로 돌아왔을 때 비운 시간의 보상을 정산하고 자동 사냥을 재개한다. 다른 앱 위로 게임을 강제로 띄우지 않는다.
 
-**[Windows 시연 ZIP 다운로드](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.4.0-preview.1/ExpeditionBoss-Windows-Demo.zip)** · **[전체 다운로드 / Release](https://github.com/Daeho-AI/pleos-expedition-boss/releases/tag/v0.4.0-preview.1)** · **[SDK 검증 기록](docs/validation/SDK_VALIDATION.md)**
+**[Windows 시연 ZIP 다운로드](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.4.0-preview.2/ExpeditionBoss-Windows-Demo.zip)** · **[전체 다운로드 / Release](https://github.com/Daeho-AI/pleos-expedition-boss/releases/tag/v0.4.0-preview.2)** · **[SDK 검증 기록](docs/validation/SDK_VALIDATION.md)**
 
 공모전 제출용 APK: **[모아_원정보스_release.apk](apk/모아_원정보스_release.apk)**. 기존 영문 APK와 내용·서명이 같은 0.4.0 파일이다. 심사 기준에 맞춘 사용 시나리오, 현재 구현 범위와 향후 계획은 [공모전 설명](docs/CONTEST.md)을 참고한다.
 
 ## 90초 실행 시연
 
-[![원정 보스 90초 실행 시연 보기](artifacts/screenshots/demo-90s-poster.jpg)](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.4.0-preview.1/ExpeditionBoss-90s-Demo.mp4)
+[![원정 보스 90초 실행 시연 보기](artifacts/screenshots/demo-90s-poster.jpg)](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.4.0-preview.2/ExpeditionBoss-90s-Demo.mp4)
 
-**[영상 보기·다운로드 (MP4, 90초)](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.4.0-preview.1/ExpeditionBoss-90s-Demo.mp4)** · [장면별 설명과 시연 범위](docs/DEMO_VIDEO.md) · [한국어 자막](docs/demo/ExpeditionBoss-90s-Demo.ko.srt)
+**[영상 보기·다운로드 (MP4, 90초)](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.4.0-preview.2/ExpeditionBoss-90s-Demo.mp4)** · [장면별 설명과 시연 범위](docs/DEMO_VIDEO.md) · [한국어 자막](docs/demo/ExpeditionBoss-90s-Demo.ko.srt)
 
-0.4.0 앱의 실제 실행 화면을 중심으로 새로 촬영했다. 합성 해설과 왼쪽 설명판을 없애고, 캐릭터 전투·장비 변경·보상·복귀 필살기를 큰 화면과 짧은 자막으로 보여 준다. 이동 시연에는 가상 입력을 사용하며 실제 SDK 연결 장면과 구분한다.
+복귀 보상, 거리 필살기, 강화, 상점 구매, 친구 교환을 실제 결과와 큰 글자로 설명하는 90초 영상이다. 전투 장면은 도입부 6초이며, 보상 수치·강화 버튼·구매 확인창·교환 완료 내역을 확대해서 보여 준다. 음성은 없다. 가상 이동 10km와 공식 에뮬레이터의 SDK 실수신 0km를 구분한다. 이번 배포는 영상·문서 개정이며 앱과 APK는 검증된 0.4.0 그대로다.
 
 ## 0.4.0 — 내 캐릭터가 보이는 전투
 
@@ -76,8 +76,8 @@ ZIP에는 시연 APK가 포함된다. Git으로 소스를 받은 경우에도 `s
 | 파일 | 용도 | 설치 ID |
 |---|---|---|
 | [Daeho-AI_ExpeditionBoss_release.apk](apk/Daeho-AI_ExpeditionBoss_release.apk) | 실제 SDK 사용, 서명된 release 빌드 | `dev.pleos.entry.boss` |
-| [boss-fixture-debug.apk](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.4.0-preview.1/boss-fixture-debug.apk) | 게임 체험, 가상 운행 버튼 제공 | `dev.pleos.entry.boss.fixture` |
-| [boss-pleos-debug.apk](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.4.0-preview.1/boss-pleos-debug.apk) | SDK 진단·개발 도구용 | `dev.pleos.entry.boss` |
+| [boss-fixture-debug.apk](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.4.0-preview.2/boss-fixture-debug.apk) | 게임 체험, 가상 운행 버튼 제공 | `dev.pleos.entry.boss.fixture` |
+| [boss-pleos-debug.apk](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.4.0-preview.2/boss-pleos-debug.apk) | SDK 진단·개발 도구용 | `dev.pleos.entry.boss` |
 
 시연과 SDK 앱의 저장 공간은 분리된다. SDK debug와 release는 서명이 달라 서로 덮어쓸 수 없다. 새 테스트 기기를 사용한다. 서명키는 저장소에 포함하지 않는다. `release`는 빌드 종류이며 상용 출시 승인을 뜻하지 않는다.
 
