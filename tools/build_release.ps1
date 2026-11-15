@@ -22,8 +22,8 @@ try {
     [ordered]@{
         file = [IO.Path]::GetFileName($destination)
         applicationId = 'dev.pleos.entry.boss'
-        versionName = '0.7.0'
-        versionCode = 8
+        versionName = '0.7.1'
+        versionCode = 9
         buildType = 'release'
         debuggable = $false
         bytes = (Get-Item -LiteralPath $destination).Length

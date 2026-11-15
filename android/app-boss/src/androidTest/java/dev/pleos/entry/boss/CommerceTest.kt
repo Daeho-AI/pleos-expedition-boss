@@ -59,6 +59,7 @@ class SocialIntegrationTest {
         val social=SocialController(graph,prefsName)
         val otherToken=UUID.randomUUID().toString().replace("-","")+UUID.randomUUID().toString().replace("-","")
         val endpoint="http://10.0.2.2:8765"
+        val peerEndpoint=androidx.test.platform.app.InstrumentationRegistry.getArguments().getString("socialPeerEndpoint")?:endpoint
         val localItem=Equipment("twig_blade",Rarity.RARE,3)
         val otherItem=Equipment("leaf_coat",Rarity.EPIC,2)
         suspend fun done() {
@@ -66,7 +67,7 @@ class SocialIntegrationTest {
             assertNull(social.state.value.error)
         }
         fun other(path:String,body:JSONObject?=null):JSONObject {
-            val connection=URL(endpoint+path).openConnection() as HttpURLConnection
+            val connection=URL(peerEndpoint+path).openConnection() as HttpURLConnection
             try {
                 connection.connectTimeout=10000;connection.readTimeout=10000
                 connection.setRequestProperty("Authorization","Bearer $otherToken")

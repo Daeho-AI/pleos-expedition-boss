@@ -122,16 +122,31 @@ class SocialController(private val graph: BossGraph, preferencesName: String = "
         mutable.value = mutable.value.copy(snapshot = snapshot, profile = snapshot.profile, error = null)
     }
     private fun request(path: String, body: JsonObject? = null): String {
-        val connection = URL(mutable.value.server + path).openConnection() as HttpURLConnection
+        val target = URL(mutable.value.server + path)
+        fun configured(url: URL, timeout: Int = 10000): HttpURLConnection =
+            (url.openConnection() as HttpURLConnection).apply {
+                connectTimeout = timeout; readTimeout = 10000
+                instanceFollowRedirects = false; useCaches = false
+                requestMethod = if (body == null) "GET" else "POST"
+                setRequestProperty("Authorization", "Bearer " + prefs.getString("token", ""))
+                setRequestProperty("Accept", "application/json")
+                if (body != null) {
+                    doOutput = true
+                    setRequestProperty("Content-Type", "application/json; charset=utf-8")
+                }
+            }
+        // The official emulator may have no app-facing Ethernet route. The PC
+        // launcher provides an ADB tunnel for its local server. Preserve the
+        // configured endpoint/realm, and never change release HTTPS transport.
+        val connection = if (BuildConfig.DEBUG && target.protocol == "http" && target.host == "10.0.2.2") {
+            val local = configured(URL("http", "127.0.0.1", target.port, target.file), 500)
+            try { local.connect(); local } catch (_: java.io.IOException) {
+                // Retry only connection setup, before any POST body is written.
+                local.disconnect(); configured(target)
+            }
+        } else configured(target)
         try {
-            connection.connectTimeout = 10000; connection.readTimeout = 10000
-            connection.instanceFollowRedirects = false; connection.useCaches = false
-            connection.requestMethod = if (body == null) "GET" else "POST"
-            connection.setRequestProperty("Authorization", "Bearer " + prefs.getString("token", ""))
-            connection.setRequestProperty("Accept", "application/json")
             if (body != null) {
-                connection.doOutput = true
-                connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
                 connection.outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
             }
             val code = connection.responseCode

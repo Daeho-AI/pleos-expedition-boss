@@ -1,0 +1,72 @@
+{
+  "environment": "official PleosBoss emulator; synthetic console inputs",
+  "app": "SDK 0.7.1",
+  "versionCode": 9,
+  "events": [
+    {
+      "at": 9.62,
+      "action": "Enter parked battle"
+    },
+    {
+      "at": 11.27,
+      "action": "Parked game visible"
+    },
+    {
+      "at": 11.42,
+      "action": "Synthetic test gear: Drive"
+    },
+    {
+      "at": 12.03,
+      "action": "Synthetic test speed: 40 km/h"
+    },
+    {
+      "at": 16.77,
+      "action": "Capture driving restriction"
+    },
+    {
+      "at": 19.2,
+      "action": "Read saved HP during driving A"
+    },
+    {
+      "at": 24.7,
+      "action": "Read saved HP during driving B"
+    },
+    {
+      "at": 26.02,
+      "action": "Stop test movement"
+    },
+    {
+      "at": 28.02,
+      "action": "Synthetic test gear: Park"
+    },
+    {
+      "at": 31.34,
+      "action": "Return to game after parking"
+    },
+    {
+      "at": 37.66,
+      "action": "Capture parked return"
+    },
+    {
+      "at": 39.52,
+      "action": "Return to vehicle journey hub"
+    }
+  ],
+  "drivingObservations": [
+    {
+      "label": "driving-a",
+      "bossId": "4004cf13-a4e4-4ef7-8260-4fffb3c16538",
+      "hpMilli": 6472099,
+      "chests": 94,
+      "paused": true
+    },
+    {
+      "label": "driving-b",
+      "bossId": "4004cf13-a4e4-4ef7-8260-4fffb3c16538",
+      "hpMilli": 6472099,
+      "chests": 94,
+      "paused": true
+    }
+  ],
+  "drivingPauseVerified": true
+}

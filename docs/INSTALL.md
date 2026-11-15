@@ -4,7 +4,7 @@ Windows 자동 설치는 D드라이브를 전제로 한다. 다른 운영체제�
 
 ## 첫 설치
 
-1. [Windows 시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/ExpeditionBoss-Windows-Demo.zip)을 `D:\Codex\ExpeditionBoss`에 압축 해제한다.
+1. [Windows 시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/submission/ExpeditionBoss-Windows-Demo.zip)을 `D:\Codex\ExpeditionBoss`에 압축 해제한다.
 2. Python 3.11 이상을 설치한다. `py -3 --version` 또는 `python --version`으로 확인한다.
 3. `setup.cmd`를 실행한다. 최초 다운로드는 네트워크에 따라 오래 걸릴 수 있다. 완료 후 게임 창이 열린다.
 4. 다음에는 `demo.cmd`로 실행한다.

@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $config = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'toolchain-state.json') -Raw | ConvertFrom-Json
 $build = Join-Path $config.toolchainRoot 'build'
@@ -34,7 +34,7 @@ $suites = @(Get-ChildItem -LiteralPath (Join-Path $build 'core-game\test-results
     packagedAt=(Get-Date -Format o)
     naviHelper='3.0.5'
     vehicleSdk='2.3.2'
-    versionName='0.7.0'
+    versionName='0.7.1'
     compileSdk=35
     minimumSdk=33
     buildType='debug'

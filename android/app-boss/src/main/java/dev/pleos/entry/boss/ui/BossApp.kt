@@ -132,7 +132,7 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("equipmen
     Row(Modifier.fillMaxWidth().heightIn(min=88.dp).padding(horizontal=if(compact)16.dp else 28.dp),verticalAlignment=Alignment.CenterVertically){
         if(screen in listOf("settings","diagnostics","history"))IconButton(onClick={navigate(if(screen=="settings")"home" else "settings")},modifier=Modifier.size(64.dp).testTag("page-back")){Icon(Icons.Default.ArrowBack,"뒤로",tint=Ink)}
         Text("원정 보스",fontSize=if(compact)24.sp else 28.sp,fontWeight=FontWeight.Bold)
-        if(BuildConfig.IS_FIXTURE&&!compact){Spacer(Modifier.width(16.dp));Text("시연",color=Muted,fontSize=16.sp)}
+
         Spacer(Modifier.weight(1f))
         Money(Icons.Default.Toll,"코인",game.hero.coins,compact)
         Spacer(Modifier.width(if(compact)16.dp else 30.dp))
@@ -157,7 +157,7 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("equipmen
             Spacer(Modifier.height(12.dp));Text("실제 차량 대신 가상 주행거리를 입력합니다.",color=Muted)
             Spacer(Modifier.height(16.dp));ActionButton("7분 · 10 km 이동 시연",{graph.simulateTrip();navigate("home")},Modifier.testTag("fixture-run"),!playing)
         }
-        Spacer(Modifier.height(32.dp));Text("원정 보스 "+BuildConfig.VERSION_NAME,color=Muted,fontSize=16.sp)
+        Spacer(Modifier.height(32.dp));Text("원정 보스",color=Muted,fontSize=16.sp)
     }
 }
 @Composable private fun SettingsRow(title:String,icon:ImageVector,modifier:Modifier=Modifier,onClick:()->Unit){
@@ -276,7 +276,7 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("equipmen
             Text("주차 후 이어서 플레이하세요",fontSize=30.sp,fontWeight=FontWeight.SemiBold)
             Spacer(Modifier.height(16.dp));Text("진행 상황은 저장되어 있습니다.",color=Muted,fontSize=20.sp)
 
-            if(fixture)Text("가상 주행 시연",color=Gold,modifier=Modifier.padding(top=20.dp),fontSize=16.sp)
+
         }
     }
 }

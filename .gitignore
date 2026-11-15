@@ -88,3 +88,14 @@ docs/validation/*.txt
 !docs/validation/instrumentation-sdk-tests-0.7.0.txt
 !docs/validation/lint-0.7.0.txt
 !docs/validation/launcher-0.7.0.json
+
+# Reviewed current app evidence.
+!docs/validation/app-ui-tests.txt
+!docs/validation/app-sdk-tests.txt
+!docs/validation/app-recording.txt
+!docs/validation/app-social-tests.txt
+!docs/validation/app-social-recording.txt
+!docs/validation/app-driving.json
+!docs/validation/app-video-timeline.json
+!docs/validation/app-layout.json
+!docs/validation/app-lint.txt

@@ -128,6 +128,10 @@ try {
     $package = if ($Mode -eq 'fixture') { 'dev.pleos.entry.boss.fixture' } else { 'dev.pleos.entry.boss' }
     # Pleos may retain a hidden TaskView for an installed app. Recreate only our
     # app task, preserving Room data, and confirm its activity is actually resumed.
+    # Keep the local friend server reachable even when the Pleos image exposes
+    # Ethernet only to vehicle services. This is limited to the named emulator.
+    $socialTunnel = Invoke-BossAdb -AdbArguments @('-s','emulator-5554','reverse','tcp:8765','tcp:8765')
+    if ($socialTunnel.ExitCode -ne 0) { throw "친구 서버 연결을 준비하지 못했습니다.`n$($socialTunnel.Text)" }
     $inFront = $false
     for ($attempt = 1; $attempt -le 3; $attempt++) {
         $stopApp = Invoke-BossAdb -AdbArguments @('-s','emulator-5554','shell','am','force-stop','--user',$driverUser,$package)

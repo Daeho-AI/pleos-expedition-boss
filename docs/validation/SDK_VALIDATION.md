@@ -55,6 +55,6 @@ python .\tools\verify_android.py --fixture-tests --pull-images
 
 기기 테스트는 시연 데이터로 수행한다. UI 테스트는 테스트 전의 진행 상태를 저장하고 종료 시 복원한다. `--reset-demo` 옵션은 진행 전체를 지우므로 일반 검증에는 사용하지 않는다.
 
-전투·보상·상점 규칙 결과는 [unit-tests.json](unit-tests.json), 최신 화면 변경과 SDK 연결 재검사의 검증 범위는 [0.7.0 검증 기록](UPGRADE_0_7.md)에 있다.
+전투·보상·상점 규칙 결과는 [unit-tests.json](unit-tests.json), 최신 화면 변경과 SDK 연결 재검사의 검증 범위는 [앱 실행 확인](APP_VALIDATION.md)에 있다.
 
 공식 참고: [NaviHelper 샘플](https://github.com/Pleos-Playground/pleos-sample-navi-app), [Pleos 개발 가이드](https://document.pleos.ai/docs/pleos-only/getting-started).

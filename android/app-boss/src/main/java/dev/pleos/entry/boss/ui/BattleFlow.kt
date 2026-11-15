@@ -92,7 +92,7 @@ private enum class BattlePage { ARRIVAL, ARENA, VICTORY, REWARD }
                 Icon(Icons.Default.ArrowBack,null,Modifier.size(21.dp));Spacer(Modifier.width(10.dp));Text("원정",fontSize=19.sp)
             }
             Spacer(Modifier.weight(1f))
-            Text(if(BuildConfig.IS_FIXTURE)"주차 중 · 시연" else "주차 중",color=Muted,fontSize=18.sp)
+            Text("주차 중",color=Muted,fontSize=18.sp)
         }
         if(page==BattlePage.ARENA){
             Row(Modifier.align(Alignment.BottomEnd).padding(24.dp),horizontalArrangement=Arrangement.spacedBy(12.dp)){

@@ -2,7 +2,7 @@
 
 **평소의 주행거리를 보스에게 날리는 필살기로 바꾸고, 주차·충전 대기 중에는 사냥과 장비 수집을 즐기는 차량용 방치형 RPG입니다.**
 
-[**▶ 시연 영상 보기**](https://daeho-ai.github.io/pleos-expedition-boss/) · [**APK 다운로드**](https://github.com/Daeho-AI/pleos-expedition-boss/raw/refs/heads/main/apk/모아_원정보스_release.apk) · [**Windows에서 체험하기**](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/ExpeditionBoss-Windows-Demo.zip)
+[**▶ 시연 영상 보기**](https://daeho-ai.github.io/pleos-expedition-boss/) · [**APK 다운로드**](https://github.com/Daeho-AI/pleos-expedition-boss/raw/refs/heads/main/apk/모아_원정보스_release.apk) · [**Windows에서 체험하기**](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/submission/ExpeditionBoss-Windows-Demo.zip)
 
 [![Pleos 차량 화면에서 실행한 원정 보스](artifacts/screenshots/ui-home-light.png)](https://daeho-ai.github.io/pleos-expedition-boss/)
 
@@ -46,7 +46,7 @@ flowchart LR
 
 ### Windows에서 체험
 
-1. [시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/ExpeditionBoss-Windows-Demo.zip)을 받아 `D:\Codex\ExpeditionBoss`에 압축을 풉니다.
+1. [시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/submission/ExpeditionBoss-Windows-Demo.zip)을 받아 `D:\Codex\ExpeditionBoss`에 압축을 풉니다.
 2. Python 3.11 이상을 설치한 뒤 `setup.cmd`를 실행합니다. Pleos 에뮬레이터와 필요한 도구를 준비하고 게임을 엽니다.
 3. 다음부터는 `demo.cmd`로 실행합니다. 친구 서버도 PC에서 함께 실행됩니다.
 4. 게임의 **설정 → 7분 · 10 km 이동 시연**에서 주행 중 중단, 복귀 보상과 필살기를 체험합니다. 이 버튼의 시간·거리는 가상 입력입니다.
@@ -61,7 +61,7 @@ Windows 10/11 x64, 하드웨어 가상화, 인터넷 연결이 필요합니다. 
 adb install -r .\apk\모아_원정보스_release.apk
 ```
 
-주차 상태에서 앱을 열고 **차량 데이터 권한 확인**을 누른 뒤 자동 사냥을 켭니다. **설정 → 차량 연결**에서 데이터 수신 여부를 확인할 수 있습니다. 차량 데이터 시험에는 공식 Virtual Console의 활성 세션이 필요할 수 있습니다. 일반 휴대폰에서는 Pleos SDK를 사용할 수 없습니다.
+주차 상태에서 앱을 열고 **차량 데이터 권한 확인**을 누른 뒤 **보스전 입장**을 선택합니다. **설정 → 차량 연결**에서 데이터 수신 여부를 확인할 수 있습니다. 차량 데이터 시험에는 공식 Virtual Console의 활성 세션이 필요할 수 있습니다. 일반 휴대폰에서는 Pleos SDK를 사용할 수 없습니다.
 
 친구 교환은 두 사용자가 같은 서버에 연결해야 합니다. Windows 시연 앱은 같은 PC의 서버(`http://10.0.2.2:8765`)를 이용합니다. 제출용 release 앱에는 HTTPS 서버 주소를 입력해야 하며, 공개 운영 서버는 제공하지 않습니다. [친구 서버 실행·연결 안내](server/README.md)
 
@@ -73,7 +73,7 @@ adb install -r .\apk\모아_원정보스_release.apk
 - 확인한 기능: 차량 데이터 수신, 주행 중 게임 중단, 주차 후 복귀, 상자 개봉, 장비 장착·강화, 상점과 친구 교환
 - 거리 보너스의 반복 시험은 가상 입력으로 수행하며 SDK 수신 시험과 구분합니다.
 
-[차량 SDK 확인 기록](docs/validation/SDK_VALIDATION.md) · [게임 화면·기능 확인 기록](docs/validation/UPGRADE_0_7.md)
+[차량 SDK 확인 기록](docs/validation/SDK_VALIDATION.md) · [게임 화면·기능 확인 기록](docs/validation/APP_VALIDATION.md)
 
 ## 소스 구성
 

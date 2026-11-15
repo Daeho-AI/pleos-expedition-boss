@@ -1,0 +1,28 @@
+{
+  "nightModeRestored": "no",
+  "task": 1000444,
+  "originalBounds": [
+    853,
+    90,
+    2535,
+    1300
+  ],
+  "requestedNarrowBounds": [
+    853,
+    90,
+    1693,
+    1300
+  ],
+  "observedNarrowBounds": [
+    853,
+    90,
+    1693,
+    1300
+  ],
+  "restoredBounds": [
+    853,
+    90,
+    2535,
+    1300
+  ]
+}

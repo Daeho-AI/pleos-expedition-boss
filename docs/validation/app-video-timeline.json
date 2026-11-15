@@ -1,0 +1,134 @@
+[
+  {
+    "start": 0,
+    "end": 8,
+    "title": "차 안에서 키우는 나의 캐릭터",
+    "disclosure": "Pleos 에뮬레이터 · 실제 앱",
+    "sources": [
+      {
+        "file": "game-features.mp4",
+        "start": 10.359,
+        "duration": 8
+      }
+    ]
+  },
+  {
+    "start": 8,
+    "end": 20,
+    "title": "운전을 시작하면 게임은 멈춥니다",
+    "disclosure": "SDK 앱 · 가상 차량 신호",
+    "sources": [
+      {
+        "file": "vehicle-transition.mp4",
+        "start": 7,
+        "duration": 12
+      }
+    ]
+  },
+  {
+    "start": 20,
+    "end": 29,
+    "title": "주차 후, 다시 게임으로",
+    "disclosure": "SDK 앱 · P 기어 확인",
+    "sources": [
+      {
+        "file": "vehicle-transition.mp4",
+        "start": 29,
+        "duration": 9
+      }
+    ]
+  },
+  {
+    "start": 29,
+    "end": 43,
+    "title": "달린 거리만큼 강력한 일격",
+    "disclosure": "10 km · 7분 경과 가상 입력",
+    "sources": [
+      {
+        "file": "game-features.mp4",
+        "start": 47.867000000000004,
+        "duration": 6
+      },
+      {
+        "file": "game-features.mp4",
+        "start": 37.169999999999995,
+        "duration": 8
+      }
+    ]
+  },
+  {
+    "start": 43,
+    "end": 54,
+    "title": "기다리는 동안 자동 사냥",
+    "disclosure": "주차 상태에서 앱 이용",
+    "sources": [
+      {
+        "file": "game-features.mp4",
+        "start": 21.63,
+        "duration": 11
+      }
+    ]
+  },
+  {
+    "start": 54,
+    "end": 65,
+    "title": "보스를 잡고 새 장비 획득",
+    "disclosure": "실제 상자 개봉",
+    "sources": [
+      {
+        "file": "game-features.mp4",
+        "start": 59.747,
+        "duration": 3
+      },
+      {
+        "file": "game-features.mp4",
+        "start": 64.438,
+        "duration": 6
+      },
+      {
+        "file": "loot.png",
+        "start": 0,
+        "duration": 2
+      }
+    ]
+  },
+  {
+    "start": 65,
+    "end": 76,
+    "title": "장착하고 강화하면 더 강해집니다",
+    "disclosure": "실제 장비 장착 · 강화",
+    "sources": [
+      {
+        "file": "game-features.mp4",
+        "start": 72.705,
+        "duration": 11
+      }
+    ]
+  },
+  {
+    "start": 76,
+    "end": 84,
+    "title": "필요한 장비는 친구와 교환",
+    "disclosure": "PC 서버 · 시연 계정의 교환 내역",
+    "sources": [
+      {
+        "file": "social-features.mp4",
+        "start": 9.773,
+        "duration": 8
+      }
+    ]
+  },
+  {
+    "start": 84,
+    "end": 90,
+    "title": "달린 거리는 필살기로, 기다림은 성장으로",
+    "disclosure": "주행 중 중단 · 주차 후 플레이",
+    "sources": [
+      {
+        "file": "game-features.mp4",
+        "start": 106.4,
+        "duration": 6
+      }
+    ]
+  }
+]
