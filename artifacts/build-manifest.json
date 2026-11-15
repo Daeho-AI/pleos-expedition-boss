@@ -1,21 +1,21 @@
 {
-  "packagedAt": "2026-11-15T14:51:08.5738245+09:00",
+  "packagedAt": "2026-11-15T15:59:34.7974729+09:00",
   "naviHelper": "3.0.5",
   "vehicleSdk": "2.3.2",
-  "versionName": "0.5.0",
+  "versionName": "0.6.0",
   "compileSdk": 35,
   "minimumSdk": 33,
   "buildType": "debug",
   "artifacts": [
     {
       "file": "boss-fixture-debug.apk",
-      "bytes": 62844781,
-      "sha256": "2a001efb21154641d7f0be7e8afc6551d5a0d46319409e11b56946fe5dc7e55a"
+      "bytes": 62974729,
+      "sha256": "4e8cca9b5ed4c95671c1d1d2bc871be80c3f6b45c7eb88a3358397f5343f25ce"
     },
     {
       "file": "boss-pleos-debug.apk",
-      "bytes": 62841373,
-      "sha256": "664286d13cb3baac3e46a944b6eed2818d40258587ac16ec97159022e66b1045"
+      "bytes": 62971201,
+      "sha256": "f542f69f0620031cef70a11e982ae0036fcf62653c1151c8630a52362385670e"
     }
   ]
 }

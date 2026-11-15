@@ -165,17 +165,22 @@ class FixtureJourneyUiTest {
         compose.runOnUiThread{fixture.park()}
         graph.setEnabled(true)
         compose.waitUntil(10_000){graph.combatLoopActive.value&&graph.repository.state.value.hero.progress.distanceBaselineMeters!=null}
+        compose.onNodeWithTag("enter-battle").performScrollTo().performClick()
+        compose.waitUntil(10_000){compose.onAllNodesWithTag("battle-scene").fetchSemanticsNodes().isNotEmpty()}
         compose.runOnUiThread{fixture.drive(android.os.SystemClock.elapsedRealtime())}
         compose.waitUntil(10_000){!graph.combatLoopActive.value&&graph.repository.state.value.hero.progress.paused}
         compose.onNodeWithTag("driving-limited").assertExists()
         compose.onNodeWithTag("battle-scene").assertDoesNotExist()
+        compose.onNodeWithTag("screen-battle").assertDoesNotExist()
         val stopped=graph.repository.state.value
         Thread.sleep(1_200)
         assertEquals(stopped,graph.repository.state.value)
         compose.runOnUiThread{fixture.park(distanceMeters=(fixture.state.value.odometerMeters?:100_000)+2_000)}
         compose.waitUntil(10_000){graph.combatLoopActive.value&&
             (graph.repository.state.value.hero.progress.lastReturn?.strikeDamageMilli?:0)>0}
-        compose.onNodeWithTag("return-summary").assertExists()
+        compose.onNodeWithTag("screen-battle").assertExists()
+        compose.onNodeWithTag("exit-battle").performClick()
+        compose.onNodeWithTag("return-summary").performScrollTo().assertExists()
         val hp=graph.repository.state.value.encounter!!.hpMilli
         compose.waitUntil(5_000){graph.repository.state.value.encounter!!.hpMilli<hp}
     }
@@ -200,6 +205,8 @@ class FixtureJourneyUiTest {
         assertEquals(staff.key,graph.repository.state.value.equipped[Slot.WEAPON])
         screenshot("09-hero-loadout")
         compose.onNodeWithTag("nav-home").performClick()
+        compose.onNodeWithTag("enter-battle").performScrollTo().performClick()
+        compose.waitUntil(10_000){compose.onAllNodesWithTag("battle-scene").fetchSemanticsNodes().isNotEmpty()}
         compose.onNodeWithTag("battle-scene").assertExists()
         compose.onNodeWithText("밤빛 마법탄  ·  "+graph.balance.template(staff.templateId).name+" +3").assertExists()
     }
@@ -217,20 +224,66 @@ class FixtureJourneyUiTest {
         compose.waitUntil(10_000){graph.combatLoopActive.value&&graph.repository.state.value.hero.progress.lastReturn!=null}
         assertTrue(graph.repository.state.value.encounter!!.hpMilli<stopped.encounter!!.hpMilli)
     }
-    @Test fun compactVehiclePanelCanExpandWithoutChangingEquipment() {
+    @Test fun enteringBattleReplacesEntireHubAndBackPreservesEquipment() {
         Assume.assumeTrue(BuildConfig.IS_FIXTURE)
         val graph=(compose.activity.application as BossApplication).graph
         val equipped=graph.repository.state.value.equipped
         compose.onNodeWithTag("vehicle-journey-card").assertExists()
-        val compactWidth=compose.onNodeWithTag("battle-scene").fetchSemanticsNode().boundsInRoot.width
+        compose.onNodeWithTag("battle-scene").assertDoesNotExist()
+        compose.onNodeWithTag("enter-battle").performScrollTo().performClick()
+        compose.waitUntil(10_000){compose.onAllNodesWithTag("battle-scene").fetchSemanticsNodes().isNotEmpty()}
+        compose.onNodeWithTag("screen-home").assertDoesNotExist()
+        compose.onNodeWithTag("nav-equipment").assertDoesNotExist()
+        val battleWidth=compose.onNodeWithTag("battle-scene").fetchSemanticsNode().boundsInRoot.width
         val rootWidth=compose.onRoot().fetchSemanticsNode().boundsInRoot.width
-        assertTrue("The mini encounter must leave vehicle context visible",compactWidth<rootWidth*.5f)
-        compose.onNodeWithTag("toggle-panel-size").performScrollTo().performClick()
-        compose.waitUntil(5_000){compose.onNodeWithTag("battle-scene").fetchSemanticsNode().boundsInRoot.width>compactWidth}
+        assertTrue("Battle must occupy the whole app window",battleWidth>=rootWidth*.95f)
         assertEquals(equipped,graph.repository.state.value.equipped)
-        compose.onNodeWithTag("toggle-panel-size").performScrollTo().performClick()
-        compose.waitUntil(5_000){compose.onNodeWithTag("battle-scene").fetchSemanticsNode().boundsInRoot.width==compactWidth}
-        screenshot("10-vehicle-mini-panel")
+        screenshot("10-full-battle")
+        compose.onNodeWithTag("exit-battle").performClick()
+        compose.onNodeWithTag("screen-home").assertExists()
+        compose.onNodeWithTag("battle-scene").assertDoesNotExist()
+        assertEquals(equipped,graph.repository.state.value.equipped)
+    }
+    @Test fun actualDefeatRevealsOneRewardEquipsAndEntersNextBoss() {
+        Assume.assumeTrue(BuildConfig.IS_FIXTURE)
+        val graph=(compose.activity.application as BossApplication).graph
+        val initial=graph.repository.state.value.encounter!!.id
+        compose.onNodeWithTag("enter-battle").performScrollTo().performClick()
+        compose.waitUntil(10_000){compose.onAllNodesWithTag("battle-scene").fetchSemanticsNodes().isNotEmpty()}
+        // Seed a near-death test encounter, then let the real live engine finish it.
+        runBlocking{graph.repository.change{ActionResult(it.copy(encounter=it.encounter!!.copy(hpMilli=500)),"",true)}}
+        compose.waitUntil(10_000){compose.onAllNodesWithTag("battle-reward").fetchSemanticsNodes().isNotEmpty()}
+        val earned=graph.repository.state.value.chests.single{it.encounterId==initial}
+        assertNull(earned.openedAt)
+        screenshot("11-victory-chest")
+        compose.onNodeWithTag("battle-open-reward").performScrollTo().performClick()
+        compose.waitUntil(10_000){graph.repository.state.value.chests.single{it.id==earned.id}.openedAt!=null}
+        assertEquals(earned.coins,graph.repository.state.value.hero.coins)
+        compose.onNodeWithTag("battle-equip-reward").performScrollTo().performClick()
+        val key=earned.templateId+":"+earned.rarity.name
+        compose.waitUntil(10_000){graph.repository.state.value.equipped[graph.balance.template(earned.templateId).slot]==key}
+        screenshot("12-battle-loot")
+        compose.onNodeWithTag("battle-next").performScrollTo().performClick()
+        compose.waitUntil(10_000){compose.onAllNodesWithTag("battle-scene").fetchSemanticsNodes().isNotEmpty()}
+        assertNotEquals(initial,graph.repository.state.value.encounter!!.id)
+        assertEquals(1,graph.repository.state.value.chests.count{it.encounterId==initial})
+        compose.onNodeWithTag("exit-battle").performClick()
+        compose.onNodeWithTag("enter-battle").performScrollTo().performClick()
+        compose.waitUntil(10_000){compose.onAllNodesWithTag("battle-scene").fetchSemanticsNodes().isNotEmpty()}
+        compose.onNodeWithTag("battle-reward").assertDoesNotExist()
+        assertEquals(earned.coins,graph.repository.state.value.hero.coins)
+    }
+    @Test fun unattendedRewardRemainsUnopenedWhenNextBattleStarts() {
+        Assume.assumeTrue(BuildConfig.IS_FIXTURE)
+        val graph=(compose.activity.application as BossApplication).graph
+        compose.onNodeWithTag("enter-battle").performScrollTo().performClick()
+        compose.waitUntil(10_000){compose.onAllNodesWithTag("battle-scene").fetchSemanticsNodes().isNotEmpty()}
+        runBlocking{graph.repository.change{ActionResult(it.copy(encounter=it.encounter!!.copy(hpMilli=500)),"",true)}}
+        compose.waitUntil(10_000){compose.onAllNodesWithTag("battle-reward").fetchSemanticsNodes().isNotEmpty()}
+        val chest=graph.repository.state.value.chests.single()
+        compose.waitUntil(18_000){compose.onAllNodesWithTag("battle-scene").fetchSemanticsNodes().isNotEmpty()}
+        assertNull(graph.repository.state.value.chests.single{it.id==chest.id}.openedAt)
+        assertEquals(0,graph.repository.state.value.hero.coins)
     }
     private fun screenshot(name:String){
         compose.waitForIdle()

@@ -83,6 +83,8 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
                 }else{
                     LimitedScreen(status.reason,playing,BuildConfig.IS_FIXTURE)
                 }
+            }else if(screen=="battle"){
+                BossBattleScreen(game,graph,busy,shownStrikeId,{shownStrikeId=it},{screen=it},Modifier.fillMaxSize().padding(padding))
             }else{
                 BoxWithConstraints(Modifier.fillMaxSize().padding(padding)){
                     val wide=maxWidth>=850.dp
@@ -105,7 +107,7 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
                             }
                             Box(Modifier.weight(1f).fillMaxHeight().padding(if(wide)22.dp else 16.dp)){
                                 when(screen){
-                                    "home"->JourneyScreen(game,graph,status,{screen=it},playing,shownStrikeId,{shownStrikeId=it},gateway)
+                                    "home"->JourneyScreen(game,graph,status,{screen=it},playing,gateway)
                                     "chests"->ChestScreen(game,graph,busy)
                                     "equipment"->GearStudio(game,graph,busy)
                                     "shop"->ShopScreen(game,graph,busy)

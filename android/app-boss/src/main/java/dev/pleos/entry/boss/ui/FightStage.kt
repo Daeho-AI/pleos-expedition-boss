@@ -1,8 +1,7 @@
 package dev.pleos.entry.boss.ui
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -22,90 +21,108 @@ import kotlinx.coroutines.delay
 import java.util.Locale
 import kotlin.math.*
 
-/** Stationary vertical encounter: observes real HP changes and never awards progress. */
+/** Full-window fight. Effects follow stored HP deltas; drawing cannot grant damage or rewards. */
 @Composable internal fun BattleScene(game:GameState,balance:Balance,shownStrikeId:String?,onStrikeShown:(String)->Unit,modifier:Modifier=Modifier){
-    val infinite=rememberInfiniteTransition(label="pixel idle")
-    val clock=infinite.animateFloat(0f,60f,infiniteRepeatable(tween(60_000,easing=LinearEasing)),label="pixel time")
-    val attack=remember{Animatable(1f)};val ultimate=remember{Animatable(0f)}
+    val infinite=rememberInfiniteTransition(label="arena idle")
+    val clock by infinite.animateFloat(0f,60f,infiniteRepeatable(tween(60_000,easing=LinearEasing)),label="fight time")
+    val attack=remember{Animatable(1f)}
     var previous by remember{mutableStateOf(game.encounter)}
     var damage by remember{mutableLongStateOf(0L)}
-    var fallen by remember{mutableStateOf<Int?>(null)}
-    var previousLevel by remember{mutableIntStateOf(game.hero.level)}
-    var levelUp by remember{mutableStateOf(false)}
-    var strike by remember{mutableStateOf<ReturnSummary?>(null)}
-    val summary=game.hero.progress.lastReturn;val look=heroLook(game)
+    var showReturn by remember{mutableStateOf(false)}
+    val lastReturn=game.hero.progress.lastReturn
+    LaunchedEffect(lastReturn?.id,lastReturn?.strikeDamageMilli){
+        if(lastReturn!=null&&lastReturn.strikeDamageMilli>0&&shownStrikeId!=lastReturn.id){
+            onStrikeShown(lastReturn.id);showReturn=true;delay(3200);showReturn=false
+        }
+    }
+    val index=(game.encounter?.bossIndex?:0).mod(balance.bosses.size)
+    val tone=worlds[index];val look=heroLook(game);val stats=balance.stats(game)
+    val hp=((game.encounter?.hpMilli?:0).toFloat()/(game.encounter?.maxHpMilli?:1)).coerceIn(0f,1f)
+    val smoothHp by animateFloatAsState(hp,tween(500),label="boss health")
     LaunchedEffect(game.encounter?.id,game.encounter?.hpMilli){
         val before=previous;val after=game.encounter;previous=after
-        if(before!=null&&after!=null&&game.hero.autoExpeditionEnabled&&strike==null){
-            val defeated=before.id!=after.id;val delta=if(defeated)before.hpMilli else before.hpMilli-after.hpMilli
-            if(delta>0){damage=delta;fallen=if(defeated)before.bossIndex else null;attack.snapTo(0f);attack.animateTo(1f,tween(900,easing=LinearEasing));fallen=null}
+        if(before!=null&&after!=null&&before.id==after.id&&game.hero.autoExpeditionEnabled){
+            val delta=before.hpMilli-after.hpMilli
+            if(delta>0){damage=delta;attack.snapTo(0f);attack.animateTo(1f,tween(880,easing=LinearEasing))}
         }
     }
-    LaunchedEffect(summary?.id,summary?.strikeDamageMilli){
-        if(summary!=null&&summary.strikeDamageMilli>0&&shownStrikeId!=summary.id){onStrikeShown(summary.id);strike=summary
-            try{ultimate.snapTo(0f);ultimate.animateTo(1f,tween(2800,easing=LinearEasing))}finally{strike=null}}
-    }
-    LaunchedEffect(game.hero.level){if(game.hero.level>previousLevel){previousLevel=game.hero.level;levelUp=true;delay(2200);levelUp=false}}
-    val index=(strike?.strikeBossIndex?:fallen?:game.encounter?.bossIndex?:0).mod(balance.bosses.size)
-    Box(modifier.clip(RoundedCornerShape(22.dp)).background(Color(0xFF101B30)).testTag("battle-scene")){
+    BoxWithConstraints(modifier.testTag("battle-scene")){
+        val wide=maxWidth>=1100.dp
         Canvas(Modifier.fillMaxSize()){
-            val t=clock.value;val striking=strike!=null
-            val p=if(striking)ultimate.value else attack.value
-            val impact=if(p in .62f.. .97f)(1f-(p-.62f)/.35f) else 0f
-            val tone=worlds[index];val tint=if(striking)Gold else look.accent
-            val unit=maxOf(2f,floor(minOf(size.width/105f,size.height/145f)))
-            val center=floor(size.width/2/unit)*unit
-            val enemyFloor=floor(size.height*.43f/unit)*unit
-            val heroFloor=floor(size.height*.88f/unit)*unit
-            drawRect(Brush.verticalGradient(listOf(Color(0xFF15243C),Color(0xFF121C2F),Color(0xFF203040))))
-            for(i in 0..25){val x=((i*47+17)%(size.width.toInt().coerceAtLeast(1))).toFloat();val y=74f+(i*29)%(size.height.toInt().coerceAtLeast(150)-130)
-                drawRect(tone.light.copy(alpha=.12f+(i%3)*.05f),Offset(floor(x/unit)*unit,floor(y/unit)*unit),Size(unit,unit))}
-            fun dais(y:Float,width:Float){
-                drawRect(Color(0xFF091525),Offset(center-width/2,y),Size(width,4*unit))
-                drawRect(Color(0xFF2C4960),Offset(center-width/2+4*unit,y-unit),Size(width-8*unit,2*unit))
-                drawRect(tint.copy(alpha=.4f),Offset(center-width/2+8*unit,y-unit),Size(width-16*unit,unit))
-            }
-            dais(enemyFloor,43*unit);dais(heroFloor,39*unit)
-            translate(center,enemyFloor){pixelMonster(index,t,unit*1.25f,impact)}
-            translate(center,heroFloor){pixelHero(look,t,unit,if(striking)sin(p*PI).toFloat() else 0f)}
-            // Only projectiles travel. The character remains on the lower platform.
-            if(p in .08f.. .98f&&(damage>0||striking)){
-                val startY=heroFloor-29*unit;val endY=enemyFloor-11*unit
-                val flight=((p-.25f)/.40f).coerceIn(0f,1f)
-                val yy=floor((startY+(endY-startY)*flight)/unit)*unit
-                val radius=if(striking)5 else 2
-                if(p<.65f){
-                    val reach=if(p<.25f)sin(p/.25f*PI/2).toFloat() else 1f
-                    for(i in 1..4)drawRect(tint.copy(alpha=.30f/i),Offset(center-unit,yy+i*4*unit),Size(2*unit,3*unit))
+            drawArenaWorld(index,clock)
+            val p=attack.value
+            val impact=if(p in .58f.. .99f)(1f-(p-.58f)/.41f) else 0f
+            val u=maxOf(2f,floor(minOf(size.width/115f,size.height/148f)))
+            val center=size.width*.5f
+            val enemyFloor=size.height*.47f
+            val heroFloor=size.height*.84f
+            arenaPlatform(center,enemyFloor,26*u,tone.light,clock)
+            arenaPlatform(center,heroFloor,24*u,look.accent,clock)
+            // Large, readable silhouettes. Only energy attacks travel between the two positions.
+            translate(center,enemyFloor){pixelMonster(index,clock,u*1.8f,impact)}
+            translate(center,heroFloor){pixelHero(look,clock,u*1.18f,if(p<.25f)sin(p/.25f*PI).toFloat()*.3f else 0f)}
+            if(damage>0&&p<.99f){
+                val start=Offset(center,heroFloor-31*u);val end=Offset(center,enemyFloor-18*u)
+                val flight=((p-.20f)/.40f).coerceIn(0f,1f)
+                val pos=Offset(center,start.y+(end.y-start.y)*flight)
+                val tint=look.accent
+                if(p<.60f){
+                    drawCircle(Brush.radialGradient(listOf(tint.copy(alpha=.50f),Color.Transparent),pos,11*u),11*u,pos)
+                    for(i in 1..5)drawRoundRect(tint.copy(alpha=.25f/i),Offset(pos.x-u,pos.y+i*4*u),Size(u*2,u*4),CornerRadius(u))
                     when(look.motion){
-                        WeaponMotion.BLADE->{for(i in -3..3)drawRect(tint.copy(alpha=reach),Offset(center+i*unit,yy+abs(i)*unit),Size(unit*2,unit*2));drawRect(Color.White,Offset(center-unit,yy),Size(unit*2,unit))}
-                        WeaponMotion.HAMMER->{for(x in -radius..radius)for(y in -radius..radius)if(abs(x)+abs(y)<=radius+1)drawRect(if(x==0&&y==0)Color.White else tint.copy(alpha=reach),Offset(center+x*unit,yy+y*unit),Size(unit,unit))}
-                        WeaponMotion.SPEAR->{drawRect(tint,Offset(center-unit,yy-unit*5),Size(unit*2,unit*10));drawRect(Color.White,Offset(center,yy-unit*5),Size(unit,unit*6))}
-                        WeaponMotion.STAFF->{for(x in -radius..radius)for(y in -radius..radius)if(x*x+y*y<=radius*radius+1)drawRect(if(abs(x)+abs(y)<2)Color.White else tint.copy(alpha=reach),Offset(center+x*unit,yy+y*unit),Size(unit,unit))}
+                        WeaponMotion.BLADE->{for(i in -5..5)drawRect(tint,Offset(pos.x+i*u,pos.y+abs(i)*u),Size(2*u,2*u));drawRect(Color.White,Offset(pos.x-u,pos.y),Size(2*u,u))}
+                        WeaponMotion.HAMMER->{drawPath(shape(pos.x,pos.y-5*u,pos.x+5*u,pos.y,pos.x,pos.y+5*u,pos.x-5*u,pos.y),tint);drawCircle(Color.White,1.7f*u,pos)}
+                        WeaponMotion.SPEAR->{drawLine(tint,Offset(pos.x,pos.y+8*u),Offset(pos.x,pos.y-8*u),4*u,StrokeCap.Round);drawLine(Color.White,Offset(pos.x,pos.y+4*u),Offset(pos.x,pos.y-8*u),u)}
+                        WeaponMotion.STAFF->{drawCircle(tint,4*u,pos);drawCircle(Color.White,2*u,pos);for(i in 0..3){val a=i*PI.toFloat()/2+clock*4;drawCircle(tint,1.2f*u,Offset(pos.x+cos(a)*7*u,pos.y+sin(a)*7*u))}}
                     }
-                    if(striking)for(x in -2..2)drawRect(Gold.copy(alpha=.5f),Offset(center+x*unit*4,yy+unit*6),Size(unit*2,unit*4))
                 }
-                if(impact>0)for(i in 0..11){val a=i*PI.toFloat()/6;val r=(1-impact)*23*unit
-                    drawRect(tint.copy(alpha=impact),Offset(floor((center+cos(a)*r)/unit)*unit,floor((endY+sin(a)*r)/unit)*unit),Size(unit*2,unit*2))}
+                if(impact>0){
+                    drawCircle(Brush.radialGradient(listOf(tint.copy(alpha=impact*.7f),Color.Transparent),end,28*u),28*u,end)
+                    drawCircle(tint.copy(alpha=impact),((1-impact)*25+2)*u,end,style=Stroke(2*u*impact))
+                    for(i in 0..15){val a=i*PI.toFloat()/8;val r=(1-impact)*31*u
+                        drawRect((if(i%3==0)Color.White else tint).copy(alpha=impact),Offset(end.x+cos(a)*r,end.y+sin(a)*r),Size(2*u,2*u))}
+                }
             }
         }
-        Column(Modifier.fillMaxWidth().padding(18.dp)){
-            Row(verticalAlignment=Alignment.CenterVertically){Text("BOSS  "+(game.encounter?.cycle?:1).toString().padStart(2,'0'),fontSize=11.sp,color=Muted,modifier=Modifier.weight(1f));Text(if(game.hero.autoExpeditionEnabled)"● AUTO" else "Ⅱ PAUSED",color=Mint,fontSize=11.sp,fontWeight=FontWeight.Bold)}
-            Spacer(Modifier.height(7.dp));Text(balance.bosses[index].name,fontSize=18.sp,fontWeight=FontWeight.Bold,color=Color.White)
-            Spacer(Modifier.height(9.dp));LinearProgressIndicator(progress=((game.encounter?.hpMilli?:0).toFloat()/(game.encounter?.maxHpMilli?:1)).coerceIn(0f,1f),modifier=Modifier.fillMaxWidth().height(5.dp).clip(RoundedCornerShape(4.dp)),color=Gold,trackColor=Color.White.copy(alpha=.1f))
+        Column(Modifier.align(Alignment.TopCenter).padding(top=114.dp).widthIn(max=520.dp).fillMaxWidth(.65f),horizontalAlignment=Alignment.CenterHorizontally){
+            Text("BOSS  "+(index+1).toString().padStart(2,'0')+"   /   "+tone.name,color=tone.light,fontSize=14.sp,fontWeight=FontWeight.Bold)
+            Spacer(Modifier.height(9.dp));Text(balance.bosses[index].name,fontSize=32.sp,fontWeight=FontWeight.Bold)
+            Spacer(Modifier.height(15.dp));LinearProgressIndicator(progress=smoothHp,modifier=Modifier.fillMaxWidth().height(9.dp).clip(RoundedCornerShape(5.dp)),color=Gold,trackColor=Color.White.copy(alpha=.12f))
+            Spacer(Modifier.height(7.dp));Text(String.format(Locale.KOREA,"%,.0f / %,.0f",(game.encounter?.hpMilli?:0)/1000.0,(game.encounter?.maxHpMilli?:0)/1000.0),color=Muted,fontSize=13.sp)
         }
-        if(attack.value in .64f.. .98f&&strike==null&&damage>0)Text(String.format(Locale.KOREA,"−%.1f",damage/1000.0),color=Gold,fontSize=24.sp,fontWeight=FontWeight.Bold,modifier=Modifier.align(Alignment.TopCenter).padding(top=88.dp))
-        Column(Modifier.align(Alignment.BottomCenter).padding(bottom=13.dp),horizontalAlignment=Alignment.CenterHorizontally){
-            Text("여정의 수호자  Lv. "+game.hero.level,color=Color.White,fontSize=13.sp,fontWeight=FontWeight.SemiBold)
-            Text(look.motion.title+"  ·  "+(look.weapon?.let{balance.template(it.templateId).name+" +"+it.upgradeLevel}?:"시작의 검"),color=look.accent,fontSize=10.sp)
+        if(attack.value in .58f.. .98f&&damage>0)Text(String.format(Locale.KOREA,"−%.1f",damage/1000.0),color=Gold,fontSize=38.sp,fontWeight=FontWeight.Black,modifier=Modifier.align(Alignment.Center).offset(y=(-80).dp))
+        if(wide){
+            Column(Modifier.align(Alignment.CenterStart).padding(start=40.dp).width(235.dp)){
+                Text("EXPEDITION",color=tone.light,fontSize=12.sp,letterSpacing=3.sp)
+                Spacer(Modifier.height(12.dp));Text((game.encounter?.cycle?:1).toString().padStart(2,'0')+"번째 원정",fontSize=26.sp,fontWeight=FontWeight.Bold)
+                Spacer(Modifier.height(26.dp));Text("보스 처치 → 상자 → 장비 성장",color=Muted,fontSize=15.sp)
+                Spacer(Modifier.height(12.dp));Text("새 보상 상자  "+game.unopened.size+"개",color=Gold,fontSize=18.sp)
+                Spacer(Modifier.height(30.dp));Text("자동 전투",color=Mint,fontSize=17.sp,fontWeight=FontWeight.Bold)
+                Text("조작 없이 사냥이 이어집니다",color=Muted,fontSize=14.sp)
+            }
+            game.hero.progress.lastReturn?.takeIf{it.distanceChecked&&it.strikeDamageMilli>0}?.let{summary->
+                Column(Modifier.align(Alignment.CenterEnd).padding(end=40.dp).width(235.dp)){
+                    Text("여정의 힘",color=Gold,fontSize=22.sp,fontWeight=FontWeight.Bold)
+                    Spacer(Modifier.height(12.dp));Text(String.format(Locale.KOREA,"%.1f km",summary.creditedDistanceMeters/1000.0),fontSize=32.sp,fontWeight=FontWeight.Bold)
+                    Text(String.format(Locale.KOREA,"필살기 피해 +%.0f",summary.strikeDamageMilli/1000.0),color=Gold,fontSize=18.sp)
+                    Spacer(Modifier.height(10.dp));Text("복귀 정산에 반영된 기록",color=Muted,fontSize=13.sp)
+                }
+            }
         }
-        if(fallen!=null&&strike==null)PixelNotice("보스 처치","보상 상자 +1",Modifier.align(Alignment.Center))
-        if(levelUp)PixelNotice("LEVEL UP","Lv. "+game.hero.level,Modifier.align(Alignment.Center))
-        strike?.let{PixelNotice("필살의 일격",String.format(Locale.KOREA,"%.1f km  ·  %.0f 피해",it.creditedDistanceMeters/1000.0,it.strikeDamageMilli/1000.0),Modifier.align(Alignment.Center))}
+        if(showReturn&&lastReturn!=null){
+            Surface(Modifier.align(Alignment.Center).padding(32.dp),color=Color(0xED101E2D),shape=RoundedCornerShape(18.dp),border=BorderStroke(1.dp,Gold.copy(alpha=.5f))){
+                Column(Modifier.padding(horizontal=28.dp,vertical=20.dp),horizontalAlignment=Alignment.CenterHorizontally){
+                    Text("여정의 힘 · 복귀 정산 완료",color=Gold,fontSize=24.sp,fontWeight=FontWeight.Bold)
+                    Spacer(Modifier.height(8.dp));Text(String.format(Locale.KOREA,"%.1f km → 필살기 피해 +%.0f",lastReturn.creditedDistanceMeters/1000.0,lastReturn.strikeDamageMilli/1000.0),fontSize=20.sp)
+                }
+            }
+        }
+        Column(Modifier.align(Alignment.BottomStart).padding(start=32.dp,bottom=30.dp)){
+            Text("여정의 수호자  Lv. "+game.hero.level,fontSize=23.sp,fontWeight=FontWeight.Bold)
+            Spacer(Modifier.height(7.dp));Text(look.motion.title+"  ·  "+(look.weapon?.let{balance.template(it.templateId).name+" +"+it.upgradeLevel}?:"시작의 검"),color=look.accent,fontSize=14.sp)
+            Spacer(Modifier.height(8.dp));Text("공격력 "+stats.attack+"  ·  "+(if(game.hero.autoExpeditionEnabled)"AUTO" else "PAUSED"),color=Muted,fontSize=13.sp)
+        }
     }
-}
-@Composable private fun PixelNotice(title:String,detail:String,modifier:Modifier){
-    Column(modifier.background(Color(0xE6101A2A),RoundedCornerShape(12.dp)).padding(horizontal=16.dp,vertical=13.dp),horizontalAlignment=Alignment.CenterHorizontally){Text(title,color=Gold,fontSize=20.sp,fontWeight=FontWeight.Bold);Text(detail,color=Color.White,fontSize=13.sp)}
 }
 @Composable internal fun ReturnCard(summary:ReturnSummary,awaitingDistance:Boolean){
     Surface(Modifier.fillMaxWidth().testTag("return-summary"),shape=RoundedCornerShape(18.dp),color=Mint.copy(alpha=.07f)){

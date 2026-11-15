@@ -60,3 +60,10 @@ docs/validation/*.txt
 !artifacts/screenshots/pixel-vehicle-split.png
 !docs/validation/sdk-visual-0.5.json
 !docs/validation/lint-0.5.txt
+
+!artifacts/screenshots/battle-hub.png
+!artifacts/screenshots/battle-arena.png
+!artifacts/screenshots/battle-reward.png
+!artifacts/screenshots/battle-split.png
+!docs/validation/sdk-visual-0.6.json
+!docs/validation/lint-0.6.txt

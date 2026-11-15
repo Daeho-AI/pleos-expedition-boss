@@ -4,6 +4,15 @@
 
 대상 환경은 **공식 Pleos Connect 2.1.0 x86_64 에뮬레이터 / API 34**다. 시연용 APK와 실제 SDK APK를 분리하고 입력 출처를 화면에 표시한다.
 
+## 0.6.0에서 확인한 연결
+
+2026-11-15의 [실제 SDK 관측](sdk-visual-0.6.json)에서 Vehicle SDK 2.3.2 누적거리 0m, NaviHelper 연결, Android 차량 서비스 연결, 주차 허용 상태를 확인했다. 오류와 백그라운드 수신 횟수는 0이다. 에뮬레이터의 Virtual Console을 사용한 확인이며 실차 관측은 아니다.
+
+- 누적거리 차이: 주차 후 복귀 필살기 계산에 사용한다. 최초 읽은 0m 자체로 이동 보너스를 만들지 않는다.
+- P 기어·CarUxRestrictions·앱 전면 상태: 게임 실행과 화면 표시를 제어한다.
+- NaviHelper 안내 상태·속도·제한속도: 연결 진단에 표시한다. 현재 자동 사냥의 필수 조건이나 보상 배율로 사용하지 않는다.
+- 앱 전체 전투·승리·전리품 화면 검증: [0.6.0 기록](UPGRADE_0_6.md). 복귀 계산 규칙은 0.3.0 이후 유지한다.
+
 ## 0.2.0에서 확인한 연결
 
 - NaviHelper 3.0.5의 서비스 연결과 안내 상태 응답.
@@ -40,6 +49,6 @@ python .\tools\verify_android.py --fixture-tests --pull-images
 
 기기 테스트는 시연 데이터로 수행한다. UI 테스트는 테스트 전의 진행 상태를 저장하고 종료 시 복원한다. `--reset-demo` 옵션은 진행 전체를 지우므로 일반 검증에는 사용하지 않는다.
 
-전투·보상·상점 규칙 결과는 [unit-tests.json](unit-tests.json), 이번 기능 추가의 검증 범위는 [0.2.0 검증 기록](UPGRADE_0_2.md)에 있다.
+전투·보상·상점 규칙 결과는 [unit-tests.json](unit-tests.json), 최신 화면 변경의 검증 범위는 [0.6.0 검증 기록](UPGRADE_0_6.md)에 있다.
 
 공식 참고: [NaviHelper 샘플](https://github.com/Pleos-Playground/pleos-sample-navi-app), [Pleos 개발 가이드](https://document.pleos.ai/docs/pleos-only/getting-started).
