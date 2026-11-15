@@ -1,0 +1,41 @@
+{
+  "source": "actual 0.7.0 fixture APK on PleosBoss; existing simulated progress",
+  "events": [
+    {
+      "second": 9.44,
+      "screen": "장비"
+    },
+    {
+      "second": 15.53,
+      "screen": "장비 미리보기"
+    },
+    {
+      "second": 23.34,
+      "screen": "보상"
+    },
+    {
+      "second": 28.47,
+      "screen": "상자 개봉"
+    },
+    {
+      "second": 35.67,
+      "screen": "보상 확인"
+    },
+    {
+      "second": 40.61,
+      "screen": "상점"
+    },
+    {
+      "second": 45.47,
+      "screen": "친구"
+    },
+    {
+      "second": 52.2,
+      "screen": "원정"
+    },
+    {
+      "second": 55.45,
+      "screen": "야간 화면"
+    }
+  ]
+}

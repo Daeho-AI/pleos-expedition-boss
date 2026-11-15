@@ -16,6 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -32,14 +34,15 @@ import kotlinx.coroutines.delay
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
-internal val Night=Color(0xFF101824)
-internal val Panel=Color(0xFF192536)
-internal val Edge=Color(0xFF2B3C50)
-internal val Gold=Color(0xFFE8BD73)
-internal val Muted=Color(0xFFA7B8CA)
-internal val Mint=Color(0xFF9DD6E5)
-private val Ink=Color(0xFFEDF0F5)
-internal fun rarityColor(r:Rarity)=when(r){Rarity.COMMON->Color(0xFFA7B7C7);Rarity.RARE->Color(0xFF7CB9F0);Rarity.EPIC->Color(0xFFC197EF);Rarity.LEGENDARY->Gold}
+@Composable internal fun rarityColor(r:Rarity):Color {
+    val dark=MaterialTheme.colorScheme.background.luminance()<.5f
+    return when(r){
+        Rarity.COMMON->Muted
+        Rarity.RARE->if(dark)Color(0xFFAFC9FF) else Color(0xFF315FA8)
+        Rarity.EPIC->if(dark)Color(0xFFD4B9F5) else Color(0xFF7542A3)
+        Rarity.LEGENDARY->Gold
+    }
+}
 internal fun rarityName(r:Rarity)=when(r){Rarity.COMMON->"일반";Rarity.RARE->"희귀";Rarity.EPIC->"영웅";Rarity.LEGENDARY->"전설"}
 internal fun slotName(s:Slot)=when(s){Slot.WEAPON->"무기";Slot.ARMOR->"방어구";Slot.CHARM->"장신구"}
 internal fun slotIcon(s:Slot)=when(s){Slot.WEAPON->Icons.Default.FlashOn;Slot.ARMOR->Icons.Default.Shield;Slot.CHARM->Icons.Default.AutoAwesome}
@@ -47,10 +50,10 @@ private fun signed(n:Long)=if(n>0)"+"+n else n.toString()
 internal fun comparison(game:GameState,b:Balance,key:String,slot:Slot):String {
     val before=b.stats(game)
     val after=b.stats(game.copy(equipped=game.equipped+(slot to key)))
-    return "장착하면  공격 "+signed((after.attack-before.attack).toLong())+" · 체력 "+signed((after.maxHpMilli-before.maxHpMilli)/1000)
+    return if(after.attack==before.attack)"공격력 변화 없음" else "공격력 "+before.attack+" → "+after.attack+" ("+signed((after.attack-before.attack).toLong())+")"
 }
 private data class Tab(val id:String,val label:String,val icon:ImageVector)
-private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests","상자",Icons.Default.Inventory2),Tab("equipment","장비",Icons.Default.Shield),Tab("shop","상점",Icons.Default.Storefront),Tab("friends","친구·교환",Icons.Default.People),Tab("collection","도감",Icons.Default.AutoAwesome),Tab("history","기록",Icons.Default.History),Tab("diagnostics","연결",Icons.Default.SettingsInputAntenna))
+private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("equipment","장비",Icons.Default.Shield),Tab("chests","보상",Icons.Default.Inventory2),Tab("shop","상점",Icons.Default.Storefront),Tab("friends","친구",Icons.Default.People),Tab("collection","도감",Icons.Default.AutoAwesome))
 
 @Composable fun BossApp(graph:BossGraph,requestPermissions:()->Unit){
     val game by graph.repository.state.collectAsStateWithLifecycle()
@@ -67,58 +70,48 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
         value=SystemClock.elapsedRealtime()
         while(foreground&&gateway.ux==UxMode.PARKED_INTERACTIVE){delay(500);value=SystemClock.elapsedRealtime()}
     }
-    // A fresh SDK event can arrive between the 500 ms UI clock ticks. Comparing
-    // its timestamp with the older UI tick made a valid parked state look like
-    // a future sample and repeatedly destroyed the battle/intro composition.
-    // Keep the periodic stale-data check, but evaluate against current time.
+    // SDK callbacks can be newer than the periodic UI tick. Never reject a fresh sample as future data.
     val ux=if(BuildConfig.IS_FIXTURE)gateway.ux else gateway.input(maxOf(now,SystemClock.elapsedRealtime())).ux
     LaunchedEffect(graph,ux,foreground){
         if(foreground&&ux==UxMode.PARKED_INTERACTIVE)graph.messages.collect{snackbar.showSnackbar(it)}
         else snackbar.currentSnackbarData?.dismiss()
     }
-    MaterialTheme(
-        colorScheme=darkColorScheme(primary=Mint,onPrimary=Night,secondary=Gold,background=Night,surface=Panel,onSurface=Ink,onBackground=Ink,outline=Edge),
-        typography=Typography(bodyLarge=androidx.compose.ui.text.TextStyle(fontSize=18.sp,lineHeight=28.sp),bodyMedium=androidx.compose.ui.text.TextStyle(fontSize=16.sp,lineHeight=24.sp)),
-    ){
+    BackHandler(enabled=screen!="home"&&screen!="battle"){
+        screen=if(screen=="diagnostics"||screen=="history")"settings" else "home"
+    }
+    GameTheme {
         Scaffold(containerColor=Night,snackbarHost={if(foreground&&ux==UxMode.PARKED_INTERACTIVE)SnackbarHost(snackbar)}){padding->
             if(!foreground||ux!=UxMode.PARKED_INTERACTIVE){
-                if(foreground&&ux==UxMode.UNKNOWN&&!BuildConfig.IS_FIXTURE&&gateway.setupAllowed){
+                if(foreground&&ux==UxMode.UNKNOWN&&!BuildConfig.IS_FIXTURE&&gateway.setupAllowed)
                     SetupScreen(gateway,requestPermissions,graph::reconnect,graph::exportEvidence)
-                }else{
-                    LimitedScreen(status.reason,playing,BuildConfig.IS_FIXTURE)
-                }
+                else LimitedScreen(status.reason,playing,BuildConfig.IS_FIXTURE)
             }else if(screen=="battle"){
-                BossBattleScreen(game,graph,busy,shownStrikeId,{shownStrikeId=it},{screen=it},Modifier.fillMaxSize().padding(padding))
+                GameTheme(dark=true){BossBattleScreen(game,graph,busy,shownStrikeId,{shownStrikeId=it},{screen=it},Modifier.fillMaxSize().padding(padding))}
             }else{
                 BoxWithConstraints(Modifier.fillMaxSize().padding(padding)){
-                    val wide=maxWidth>=850.dp
-                    val compactHeader=maxWidth<680.dp
+                    val wide=maxWidth>=960.dp
+                    val compact=maxWidth<720.dp
                     Column(Modifier.fillMaxSize()){
-                        Header(game,BuildConfig.IS_FIXTURE,compactHeader)
-                        if(!wide) Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal=12.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)){
-                            tabs.forEach{tab->FilterChip(selected=screen==tab.id,onClick={screen=tab.id},label={Text(tab.label)},modifier=Modifier.heightIn(min=64.dp).testTag("nav-"+tab.id))}
+                        Header(game,compact,screen,{screen=it})
+                        HorizontalDivider(color=Edge)
+                        if(!wide)Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal=8.dp)){
+                            tabs.forEach{NavItem(it,screen==it.id,if(it.id=="chests")game.unopened.size else 0){screen=it.id}}
                         }
                         Row(Modifier.weight(1f).fillMaxWidth()){
-                            if(wide) Column(Modifier.width(104.dp).fillMaxHeight().verticalScroll(rememberScrollState()).padding(top=10.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(12.dp)){
-                                tabs.forEach{tab->
-                                    val selected=screen==tab.id
-                                    Column(Modifier.size(88.dp,78.dp).clip(RoundedCornerShape(18.dp)).background(if(selected)Gold.copy(alpha=.12f)else Color.Transparent).clickable{screen=tab.id}.testTag("nav-"+tab.id),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.Center){
-                                        Icon(tab.icon,tab.label,tint=if(selected)Gold else Muted,modifier=Modifier.size(25.dp))
-                                        Spacer(Modifier.height(7.dp))
-                                        Text(tab.label+(if(tab.id=="chests"&&game.unopened.isNotEmpty())" "+game.unopened.size else ""),color=if(selected)Gold else Muted,fontSize=13.sp)
-                                    }
-                                }
+                            if(wide)Column(Modifier.width(96.dp).fillMaxHeight().padding(top=16.dp).verticalScroll(rememberScrollState()),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(8.dp)){
+                                tabs.forEach{NavItem(it,screen==it.id,if(it.id=="chests")game.unopened.size else 0){screen=it.id}}
                             }
-                            Box(Modifier.weight(1f).fillMaxHeight().padding(if(wide)22.dp else 16.dp)){
+                            Box(Modifier.weight(1f).fillMaxHeight().padding(if(wide)28.dp else 20.dp)){
                                 when(screen){
-                                    "home"->JourneyScreen(game,graph,status,{screen=it},playing,gateway)
+                                    "home"->JourneyScreen(game,graph,{screen=it},playing)
                                     "chests"->ChestScreen(game,graph,busy)
                                     "equipment"->GearStudio(game,graph,busy)
                                     "shop"->ShopScreen(game,graph,busy)
                                     "friends"->FriendsScreen(game,graph)
                                     "collection"->CollectionScreen(game,graph.balance)
                                     "history"->HistoryScreen(game)
-                                    else->DiagnosticsScreen(gateway,graph,fatal,now,requestPermissions)
+                                    "diagnostics"->DiagnosticsScreen(gateway,graph,fatal,now,requestPermissions)
+                                    else->GameSettings(graph,playing,{screen=it})
                                 }
                             }
                         }
@@ -128,102 +121,74 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
         }
     }
 }
-@Composable private fun Header(game:GameState,fixture:Boolean,compact:Boolean){
-    Column(Modifier.fillMaxWidth().padding(horizontal=if(compact)16.dp else 32.dp,vertical=22.dp)){
-    Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){
-        Icon(Icons.Default.DirectionsCar,null,tint=Mint,modifier=Modifier.size(30.dp))
-        Spacer(Modifier.width(12.dp))
-        Column{Text("원정 보스",fontSize=26.sp,fontWeight=FontWeight.Bold);Text("Pleos Connect용 차량 게임",fontSize=12.sp,letterSpacing=0.sp,color=Muted)}
-        if(!compact){Spacer(Modifier.width(20.dp));BadgePill(if(fixture)"시연 데이터 · 차량 연결 아님" else "PLEOS · 차량 데이터",if(fixture)Gold else Mint)}
-        Spacer(Modifier.weight(1f))
-        Money(Icons.Default.Toll,game.hero.coins.toString(),Gold)
-        Spacer(Modifier.width(20.dp))
-        Money(Icons.Default.AutoAwesome,game.hero.dust.toString(),Color(0xFFC197EF))
-    }
-    if(compact){Spacer(Modifier.height(10.dp));BadgePill(if(fixture)"시연 데이터 · 차량 연결 아님" else "PLEOS · 차량 데이터",if(fixture)Gold else Mint)}
+@Composable private fun NavItem(tab:Tab,selected:Boolean,count:Int,onClick:()->Unit){
+    val color=if(selected)Ink else Muted
+    Column(Modifier.size(88.dp,84.dp).clip(RoundedCornerShape(16.dp)).background(if(selected)MaterialTheme.colorScheme.surfaceVariant else Color.Transparent).clickable(onClick=onClick).testTag("nav-"+tab.id),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.Center){
+        Box{Icon(tab.icon,null,tint=color,modifier=Modifier.size(26.dp));if(count>0)Box(Modifier.align(Alignment.TopEnd).offset(5.dp,(-3).dp).size(7.dp).background(Mint,androidx.compose.foundation.shape.CircleShape))}
+        Spacer(Modifier.height(7.dp));Text(tab.label,color=color,fontSize=17.sp,fontWeight=if(selected)FontWeight.Bold else FontWeight.Normal)
     }
 }
-@Composable private fun Money(icon:ImageVector,value:String,color:Color){Row(verticalAlignment=Alignment.CenterVertically){Icon(icon,null,tint=color,modifier=Modifier.size(21.dp));Spacer(Modifier.width(7.dp));Text(value,fontSize=20.sp,fontWeight=FontWeight.SemiBold)}}
-@Composable internal fun BadgePill(text:String,color:Color=Gold){Surface(color=color.copy(alpha=.1f),shape=RoundedCornerShape(24.dp),border=BorderStroke(1.dp,color.copy(alpha=.3f))){Text(text,color=color,fontSize=12.sp,modifier=Modifier.padding(horizontal=13.dp,vertical=7.dp))}}
-@Composable internal fun CardBox(modifier:Modifier=Modifier,content:@Composable ColumnScope.()->Unit){Surface(modifier,shape=RoundedCornerShape(24.dp),color=Panel,border=BorderStroke(1.dp,Edge)){Column(Modifier.padding(24.dp),content=content)}}
+@Composable private fun Header(game:GameState,compact:Boolean,screen:String,navigate:(String)->Unit){
+    Row(Modifier.fillMaxWidth().heightIn(min=88.dp).padding(horizontal=if(compact)16.dp else 28.dp),verticalAlignment=Alignment.CenterVertically){
+        if(screen in listOf("settings","diagnostics","history"))IconButton(onClick={navigate(if(screen=="settings")"home" else "settings")},modifier=Modifier.size(64.dp).testTag("page-back")){Icon(Icons.Default.ArrowBack,"뒤로",tint=Ink)}
+        Text("원정 보스",fontSize=if(compact)24.sp else 28.sp,fontWeight=FontWeight.Bold)
+        if(BuildConfig.IS_FIXTURE&&!compact){Spacer(Modifier.width(16.dp));Text("시연",color=Muted,fontSize=16.sp)}
+        Spacer(Modifier.weight(1f))
+        Money(Icons.Default.Toll,"코인",game.hero.coins,compact)
+        Spacer(Modifier.width(if(compact)16.dp else 30.dp))
+        Money(Icons.Default.AutoAwesome,"가루",game.hero.dust,compact)
+        Spacer(Modifier.width(12.dp))
+        IconButton(onClick={navigate("settings")},modifier=Modifier.size(64.dp).testTag("nav-settings")){Icon(Icons.Default.Settings,"설정",tint=Muted,modifier=Modifier.size(26.dp))}
+    }
+}
+@Composable private fun Money(icon:ImageVector,label:String,value:Int,compact:Boolean){
+    Row(verticalAlignment=Alignment.CenterVertically){Icon(icon,label,tint=Muted,modifier=Modifier.size(22.dp));Spacer(Modifier.width(8.dp));Text(String.format(java.util.Locale.KOREA,"%,d",value),fontSize=if(compact)18.sp else 22.sp,fontWeight=FontWeight.SemiBold)}
+}
+@Composable private fun GameSettings(graph:BossGraph,playing:Boolean,navigate:(String)->Unit){
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("screen-settings")){
+        Title("설정","")
+        SettingsRow("원정 기록",Icons.Default.History,Modifier.testTag("nav-history")){navigate("history")}
+        SettingsRow("차량 연결",Icons.Default.SettingsInputAntenna,Modifier.testTag("nav-diagnostics")){navigate("diagnostics")}
+        Spacer(Modifier.height(32.dp));Text("플레이 안내",fontSize=22.sp,fontWeight=FontWeight.SemiBold)
+        Spacer(Modifier.height(16.dp));Text("주행 중에는 게임이 멈춥니다. 주차 후 돌아오면 보상을 받고 자동 사냥을 이어갑니다.",color=Muted)
+        Spacer(Modifier.height(12.dp));Text("이동거리에 따라 필살의 일격이 더해집니다. 한 번에 최대 30 km, 비운 시간은 최대 8시간까지 반영됩니다.",color=Muted)
+        if(BuildConfig.IS_FIXTURE){
+            Spacer(Modifier.height(32.dp));Text("시연 도구",fontSize=22.sp,fontWeight=FontWeight.SemiBold)
+            Spacer(Modifier.height(12.dp));Text("실제 차량 대신 가상 주행거리를 입력합니다.",color=Muted)
+            Spacer(Modifier.height(16.dp));ActionButton("7분 · 10 km 이동 시연",{graph.simulateTrip();navigate("home")},Modifier.testTag("fixture-run"),!playing)
+        }
+        Spacer(Modifier.height(32.dp));Text("원정 보스 "+BuildConfig.VERSION_NAME,color=Muted,fontSize=16.sp)
+    }
+}
+@Composable private fun SettingsRow(title:String,icon:ImageVector,modifier:Modifier=Modifier,onClick:()->Unit){
+    Row(modifier.fillMaxWidth().heightIn(min=88.dp).clickable(onClick=onClick).padding(20.dp),verticalAlignment=Alignment.CenterVertically){Icon(icon,null,tint=Muted);Spacer(Modifier.width(20.dp));Text(title,Modifier.weight(1f),fontSize=22.sp);Icon(Icons.Default.ChevronRight,null,tint=Muted)}
+    HorizontalDivider(color=Edge)
+}
+@Composable internal fun BadgePill(text:String,color:Color=Gold){Surface(color=color.copy(alpha=.1f),shape=RoundedCornerShape(24.dp),border=BorderStroke(1.dp,color.copy(alpha=.3f))){Text(text,color=color,fontSize=16.sp,modifier=Modifier.padding(horizontal=12.dp,vertical=6.dp))}}
+@Composable internal fun CardBox(modifier:Modifier=Modifier,content:@Composable ColumnScope.()->Unit){Surface(modifier,shape=RoundedCornerShape(18.dp),color=Panel){Column(Modifier.padding(24.dp),content=content)}}
 @Composable internal fun ActionButton(text:String,onClick:()->Unit,modifier:Modifier=Modifier,enabled:Boolean=true){
-    Button(onClick=onClick,enabled=enabled,modifier=modifier.heightIn(min=64.dp),shape=RoundedCornerShape(16.dp)){Text(text,fontSize=17.sp,fontWeight=FontWeight.SemiBold)}
+    Button(onClick=onClick,enabled=enabled,modifier=modifier.heightIn(min=64.dp),shape=RoundedCornerShape(14.dp),colors=ButtonDefaults.buttonColors(containerColor=Ink,contentColor=Panel)){Text(text,fontSize=19.sp,fontWeight=FontWeight.SemiBold)}
 }
 @Composable internal fun Title(title:String,subtitle:String){
     Text(title,fontSize=30.sp,fontWeight=FontWeight.Bold)
-    Spacer(Modifier.height(8.dp));Text(subtitle,color=Muted,fontSize=16.sp)
+    if(subtitle.isNotBlank()){Spacer(Modifier.height(8.dp));Text(subtitle,color=Muted,fontSize=18.sp)}
     Spacer(Modifier.height(24.dp))
 }
-@Composable internal fun Stat(label:String,value:String){Column{Text(label,color=Muted,fontSize=13.sp);Spacer(Modifier.height(6.dp));Text(value,fontSize=24.sp,fontWeight=FontWeight.SemiBold)}}
+@Composable internal fun Stat(label:String,value:String){Column{Text(label,color=Muted,fontSize=18.sp);Spacer(Modifier.height(6.dp));Text(value,fontSize=26.sp,fontWeight=FontWeight.SemiBold)}}
 
-@Composable private fun ChestScreen(game:GameState,graph:BossGraph,busy:Boolean){
-    var selected by remember{mutableStateOf<String?>(null)}
-    val revealed=game.chests.find{it.id==selected&&it.openedAt!=null}
-    Column(Modifier.fillMaxSize().testTag("screen-chests")){
-        Title("여정이 남긴 보물","보스가 남긴 장비, 코인, 도감 조각을 확인하세요.")
-        if(game.unopened.isNotEmpty()){
-            Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){
-                Text("열지 않은 상자 "+game.unopened.size+"개",fontSize=20.sp,fontWeight=FontWeight.SemiBold)
-                Spacer(Modifier.weight(1f))
-                ActionButton("모두 열기",{graph.openAll()},Modifier.testTag("open-all"),!busy)
-            };Spacer(Modifier.height(20.dp))
-        }
-        LazyVerticalGrid(columns=GridCells.Adaptive(280.dp),verticalArrangement=Arrangement.spacedBy(18.dp),horizontalArrangement=Arrangement.spacedBy(18.dp)){
-            if(game.chests.isEmpty())item(span={GridItemSpan(maxLineSpan)}){
-                CardBox(Modifier.fillMaxWidth()){ChestArt(Gold,Modifier.align(Alignment.CenterHorizontally).size(180.dp));Text("첫 보물을 기다리고 있어요",fontSize=24.sp,modifier=Modifier.align(Alignment.CenterHorizontally));Spacer(Modifier.height(10.dp));Text("보스를 처치하면 상자가 여기에 저장됩니다.",color=Muted,modifier=Modifier.align(Alignment.CenterHorizontally))}
-            }
-            items(game.chests.asReversed(),key={it.id}){chest->
-                CardBox{
-                    if(chest.openedAt==null){
-                        ChestArt(Gold,Modifier.fillMaxWidth().height(150.dp))
-                        Text(graph.balance.bosses.find{it.id==chest.bossId}!!.name+"의 상자",fontSize=19.sp,fontWeight=FontWeight.Bold)
-                        Spacer(Modifier.height(8.dp));Text("장비 1개 · 코인 · 도감 조각",color=Muted,fontSize=14.sp)
-                        Spacer(Modifier.height(18.dp));ActionButton("상자 열기",{selected=chest.id;graph.openChest(chest.id)},Modifier.fillMaxWidth().testTag("open-chest-"+chest.id),!busy)
-                    }else{
-                        val template=graph.balance.template(chest.templateId)
-                        BadgePill(rarityName(chest.rarity),rarityColor(chest.rarity))
-                        EquipmentArt(Equipment(chest.templateId,chest.rarity),template.slot,Modifier.fillMaxWidth().height(145.dp))
-                        Text(template.name,fontSize=21.sp,fontWeight=FontWeight.SemiBold)
-                        Spacer(Modifier.height(9.dp));Text("코인 +"+chest.coins+" · 조각 +1",color=Muted,fontSize=14.sp)
-                        if(chest.convertedDust>0)Text("중복 장비 → 강화 가루 +"+chest.convertedDust,color=rarityColor(chest.rarity),fontSize=13.sp)
-                        Spacer(Modifier.height(15.dp));Text("획득 완료",color=Mint,fontSize=13.sp)
-                    }
-                }
-            }
-        }
-    }
-    if(revealed!=null)Dialog(onDismissRequest={selected=null}){
-        CardBox(Modifier.widthIn(max=480.dp).fillMaxWidth()){
-            val t=graph.balance.template(revealed.templateId)
-            Text("새로운 보물",color=Gold,fontSize=16.sp,modifier=Modifier.align(Alignment.CenterHorizontally))
-            Spacer(Modifier.height(20.dp))
-            Surface(color=rarityColor(revealed.rarity).copy(alpha=.12f),shape=RoundedCornerShape(28.dp),modifier=Modifier.align(Alignment.CenterHorizontally)){
-                LootReveal(Equipment(revealed.templateId,revealed.rarity),t.slot,Modifier.size(240.dp))
-            }
-            Spacer(Modifier.height(24.dp));Text(t.name,fontSize=28.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center,modifier=Modifier.fillMaxWidth())
-            Spacer(Modifier.height(10.dp));BadgePill(rarityName(revealed.rarity),rarityColor(revealed.rarity))
-            Spacer(Modifier.height(18.dp));Text("코인 +"+revealed.coins+"   ·   도감 조각 +1",color=Muted)
-            if(revealed.convertedDust>0)Text("중복 장비가 강화 가루 "+revealed.convertedDust+"개로 변환됐어요.",color=Muted)
-            Spacer(Modifier.height(12.dp))
-            Text(comparison(game,graph.balance,revealed.templateId+":"+revealed.rarity.name,t.slot),color=Mint,fontSize=16.sp)
-            Spacer(Modifier.height(24.dp))
-            ActionButton("장착하기",{graph.equip(revealed.templateId+":"+revealed.rarity.name);selected=null},Modifier.fillMaxWidth(),!busy)
-            TextButton(onClick={selected=null},modifier=Modifier.align(Alignment.CenterHorizontally).heightIn(min=64.dp)){Text("나중에 확인")}
-        }
-    }
-}
 @Composable private fun CollectionScreen(game:GameState,b:Balance){
     Column(Modifier.fillMaxSize().testTag("screen-collection")){
-        Title("여정의 도감","보스 조각 10개를 모으면 작은 수호자가 컬렉션에 남아요.")
+        Title("도감","조각 10개를 모으면 미니어처를 얻습니다.")
         LazyVerticalGrid(columns=GridCells.Adaptive(280.dp),verticalArrangement=Arrangement.spacedBy(18.dp),horizontalArrangement=Arrangement.spacedBy(18.dp)){
             itemsIndexed(b.bosses){index,boss->
                 val fragments=game.collection[boss.id]?:0
+                val needed=b.chest.collectionUnlockFragments
                 CardBox{
-                    Row(Modifier.fillMaxWidth()){Text("No. "+(index+1).toString().padStart(2,'0'),color=Muted,fontSize=12.sp);Spacer(Modifier.weight(1f));Icon(if(fragments>=10)Icons.Default.Star else Icons.Default.Lock,null,tint=if(fragments>=10)Gold else Muted,modifier=Modifier.size(20.dp))}
+                    Row(Modifier.fillMaxWidth()){Text("No. "+(index+1).toString().padStart(2,'0'),color=Muted,fontSize=16.sp);Spacer(Modifier.weight(1f));Icon(if(fragments>=needed)Icons.Default.Star else Icons.Default.Lock,null,tint=if(fragments>=needed)Gold else Muted,modifier=Modifier.size(20.dp))}
                     BossArt(index,Modifier.fillMaxWidth().height(165.dp),muted=fragments==0)
                     Text(boss.name,fontSize=21.sp,fontWeight=FontWeight.SemiBold)
-                    Spacer(Modifier.height(15.dp));LinearProgressIndicator(progress=(fragments/10f).coerceAtMost(1f),modifier=Modifier.fillMaxWidth().height(6.dp),color=Gold,trackColor=Edge)
-                    Spacer(Modifier.height(9.dp));Text(if(fragments>=10)"미니어처 해금 · 조각 "+fragments+"개" else "조각 "+fragments+" / 10",color=if(fragments>=10)Gold else Muted,fontSize=14.sp)
+                    Spacer(Modifier.height(15.dp));LinearProgressIndicator(progress=(fragments/needed.toFloat()).coerceAtMost(1f),modifier=Modifier.fillMaxWidth().height(6.dp),color=Gold,trackColor=Edge)
+                    Spacer(Modifier.height(9.dp));Text(if(fragments>=needed)"수집 완료" else "조각 "+fragments+" / "+needed,color=if(fragments>=needed)Gold else Muted,fontSize=18.sp)
                 }
             }
         }
@@ -231,7 +196,7 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
 }
 @Composable private fun HistoryScreen(game:GameState){
     Column(Modifier.fillMaxSize().testTag("screen-history")){
-        Title("자동 사냥 기록","주차 중 전투와 복귀 때 정산한 성장 기록입니다.")
+        Title("원정 기록","")
         if(game.sessions.isEmpty())EmptyCard("첫 사냥을 기다리고 있어요","주차 상태에서 자동 사냥을 켜세요.",Icons.Default.Explore)
         LazyColumn(verticalArrangement=Arrangement.spacedBy(16.dp)){
             items(game.sessions.asReversed(),key={it.id}){trip->
@@ -239,8 +204,8 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
                     Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){
                         Icon(Icons.Default.Explore,null,tint=Gold,modifier=Modifier.size(38.dp));Spacer(Modifier.width(20.dp))
                         Column(Modifier.weight(1f)){
-                            Text(if(trip.state==SessionState.FINISHED)"완료한 원정" else "이어지는 원정",fontSize=22.sp,fontWeight=FontWeight.Bold)
-                            Text("유효 기록 "+(trip.eligibleMs/60000)+"분 "+(trip.eligibleMs/1000%60)+"초",color=Muted,fontSize=14.sp)
+                            Text(if(trip.state==SessionState.FINISHED)"완료한 원정" else "진행 중",fontSize=22.sp,fontWeight=FontWeight.Bold)
+                            Text("사냥 시간 "+(trip.eligibleMs/60000)+"분 "+(trip.eligibleMs/1000%60)+"초",color=Muted,fontSize=18.sp)
                         }
                         Stat("보스 처치",trip.kills.toString());Spacer(Modifier.width(35.dp));Stat("획득 상자",trip.chestIds.size.toString())
                     }
@@ -253,7 +218,7 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
 @Composable private fun DiagnosticsScreen(state:GatewayState,graph:BossGraph,fatal:String?,now:Long,requestPermissions:()->Unit){
     fun age(at:Long?)=if(at==null)"미수신" else((now-at).coerceAtLeast(0)/1000).toString()+"초 전"
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("screen-diagnostics")){
-        Title("연결 확인",if(BuildConfig.IS_FIXTURE)"이 빌드는 시연용입니다. 숫자가 있어도 실제 SDK 연동을 뜻하지 않습니다." else "실제로 받은 값과 권한 상태를 확인합니다.")
+        Title("차량 연결",if(BuildConfig.IS_FIXTURE)"가상 차량으로 실행 중입니다." else "차량에서 받은 정보를 확인합니다.")
         CardBox(Modifier.fillMaxWidth()){
             DiagnosticRow("실행 모드",state.source)
             DiagnosticRow("NaviHelper 3.0.5",state.naviConnection)
@@ -291,13 +256,13 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
     Box(Modifier.fillMaxSize().padding(48.dp),contentAlignment=Alignment.Center){
         CardBox(Modifier.widthIn(max=700.dp).fillMaxWidth()){
             Icon(Icons.Default.Shield,null,tint=Gold,modifier=Modifier.size(50.dp))
-            Spacer(Modifier.height(22.dp));Text("첫 원정을 준비해요",fontSize=32.sp,fontWeight=FontWeight.Bold)
-            Spacer(Modifier.height(16.dp));Text("기어와 화면 허용 상태로 주차를 확인합니다. 누적 주행거리의 차이는 복귀 시 필살기에 사용하며, 위치와 이동 경로는 수집하지 않습니다.",color=Muted)
+            Spacer(Modifier.height(22.dp));Text("주차 상태를 확인해 주세요",fontSize=32.sp,fontWeight=FontWeight.Bold)
+            Spacer(Modifier.height(16.dp));Text("차량 정보 접근을 허용하면 시작할 수 있습니다. 위치와 이동 경로는 수집하지 않습니다.",color=Muted)
             Spacer(Modifier.height(24.dp))
             DiagnosticRow("차량 속도 권한",if(state.speedPermission)"허용됨" else "필요")
             DiagnosticRow("기어 상태 권한",if(state.powertrainPermission)"허용됨" else "필요")
             DiagnosticRow("내비 연결",state.naviConnection)
-            state.lastError?.let{Text(it,color=Color(0xFFEE9C91),fontSize=14.sp)}
+            state.lastError?.let{Text(it,color=Color(0xFFEE9C91),fontSize=18.sp)}
             Spacer(Modifier.height(20.dp));ActionButton("차량 데이터 권한 확인",request,Modifier.fillMaxWidth().testTag("request-permissions"))
             Row{TextButton(onClick=reconnect,modifier=Modifier.heightIn(min=64.dp)){Text("다시 연결")};TextButton(onClick=export,modifier=Modifier.heightIn(min=64.dp)){Text("확인 기록 저장")}}
         }
@@ -308,10 +273,10 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
         Column(horizontalAlignment=Alignment.CenterHorizontally){
             Icon(Icons.Default.DirectionsCar,null,tint=Mint,modifier=Modifier.size(48.dp))
             Spacer(Modifier.height(28.dp))
-            Text(if(playing)"주행 중 중단 시연" else "주차 후 이용해 주세요",fontSize=30.sp,fontWeight=FontWeight.SemiBold)
-            Spacer(Modifier.height(16.dp));Text(if(playing)"시연 데이터 · 실제 주행 아님" else reason,color=Muted,fontSize=18.sp)
-            Spacer(Modifier.height(24.dp));Text("게임이 일시 중지되었습니다. 복귀하면 보상을 정산합니다.",color=Muted,fontSize=15.sp)
-            if(fixture)Text("FIXTURE",color=Gold,modifier=Modifier.padding(top=20.dp),fontSize=12.sp)
+            Text("주차 후 이어서 플레이하세요",fontSize=30.sp,fontWeight=FontWeight.SemiBold)
+            Spacer(Modifier.height(16.dp));Text("진행 상황은 저장되어 있습니다.",color=Muted,fontSize=20.sp)
+
+            if(fixture)Text("가상 주행 시연",color=Gold,modifier=Modifier.padding(top=20.dp),fontSize=16.sp)
         }
     }
 }

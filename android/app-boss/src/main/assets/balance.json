@@ -141,28 +141,28 @@
       "id": "leaf_coat",
       "slot": "ARMOR",
       "name": "잎사귀 외투",
-      "baseAttack": 0,
+      "baseAttack": 2,
       "baseHp": 10
     },
     {
       "id": "shell_mail",
       "slot": "ARMOR",
       "name": "등껍질 갑옷",
-      "baseAttack": 0,
+      "baseAttack": 3,
       "baseHp": 15
     },
     {
       "id": "cloud_robe",
       "slot": "ARMOR",
       "name": "구름 로브",
-      "baseAttack": 0,
+      "baseAttack": 4,
       "baseHp": 20
     },
     {
       "id": "iron_plate",
       "slot": "ARMOR",
       "name": "철빛 갑옷",
-      "baseAttack": 0,
+      "baseAttack": 5,
       "baseHp": 25
     },
     {
@@ -194,5 +194,5 @@
       "baseHp": 10
     }
   ],
-  "balanceVersion": "1.0.0"
+  "balanceVersion": "1.1.0"
 }

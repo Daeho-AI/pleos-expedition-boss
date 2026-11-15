@@ -1,0 +1,53 @@
+{
+  "method": "WCAG relative luminance contrast calculation; representative UI color pairs, not a complete accessibility audit",
+  "pairs": [
+    {
+      "name": "light text",
+      "foreground": "#181A1E",
+      "background": "#F3F4F5",
+      "ratio": 15.82
+    },
+    {
+      "name": "light secondary",
+      "foreground": "#5D626C",
+      "background": "#E9EBEE",
+      "ratio": 5.13
+    },
+    {
+      "name": "light primary",
+      "foreground": "#2558AF",
+      "background": "#FFFFFF",
+      "ratio": 6.79
+    },
+    {
+      "name": "light gold",
+      "foreground": "#855714",
+      "background": "#FFFFFF",
+      "ratio": 6.23
+    },
+    {
+      "name": "dark text",
+      "foreground": "#F2F3F4",
+      "background": "#222428",
+      "ratio": 13.99
+    },
+    {
+      "name": "dark secondary",
+      "foreground": "#B1B5BD",
+      "background": "#222428",
+      "ratio": 7.56
+    },
+    {
+      "name": "dark primary",
+      "foreground": "#BCD0FF",
+      "background": "#222428",
+      "ratio": 10.07
+    },
+    {
+      "name": "dark gold",
+      "foreground": "#E7C382",
+      "background": "#222428",
+      "ratio": 9.27
+    }
+  ]
+}

@@ -59,7 +59,9 @@ import kotlin.math.pow
             if (t.slot == Slot.ARMOR) {
                 hp += item.upgradeLevel * upgrades.hpPerLevel
                 reduction = overspeed.armorReductionByRarity.getValue(item.rarity)
-            } else attack += item.upgradeLevel * upgrades.attackPerLevel
+            }
+            // Every equipment slot contributes to parked idle combat, including armor upgrades.
+            attack += item.upgradeLevel * upgrades.attackPerLevel
         }
         return HeroStats(attack, hp.toLong() * 1000, reduction.coerceAtMost(overspeed.maxArmorReductionFraction))
     }

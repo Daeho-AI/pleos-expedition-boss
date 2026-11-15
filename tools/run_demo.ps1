@@ -137,7 +137,7 @@ try {
     $pidResult = Invoke-BossAdb -AdbArguments @('-s','emulator-5554','shell','pidof',$package)
     if ($pidResult.ExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($pidResult.Text)) { throw '게임이 시작 직후 종료됐습니다.' }
     if ($Mode -eq 'fixture') {
-        Write-Host '게임이 열렸습니다. 기기 창에서 [7분 비움 · 10km 복귀]을 눌러 보세요.'
+        Write-Host '게임이 열렸습니다. [설정]에서 [7분 · 10 km 이동 시연]을 선택할 수 있습니다.'
     } else {
         Write-Host '실제 SDK 연동용 게임 화면이 열렸습니다.'
         $forward = Invoke-BossAdb -AdbArguments @('-s','emulator-5554','forward','tcp:8088','tcp:8088')

@@ -4,7 +4,7 @@
 
 - [Daeho-AI_ExpeditionBoss_release.apk](Daeho-AI_ExpeditionBoss_release.apk): 버전 0.4.0, Pleos/AAOS용, `dev.pleos.entry.boss`, 디버깅 비활성화.
 - [release-manifest.json](release-manifest.json): 크기와 SHA-256.
-- [전체 다운로드](https://github.com/Daeho-AI/pleos-expedition-boss/releases/tag/v0.6.1-preview.1): Windows 시연 ZIP, 시연 APK, SDK 진단용 debug APK.
+- [전체 다운로드](https://github.com/Daeho-AI/pleos-expedition-boss/releases/tag/v0.7.0-preview.1): Windows 시연 ZIP, 시연 APK, SDK 진단용 debug APK.
 
 게임 체험에는 시연 APK를 사용한다. 친구 서버는 ZIP에 소스로 포함되며 `setup.cmd`가 실행 환경을 준비한다. release APK에서 외부 친구 서버를 연결할 때는 HTTPS 주소를 사용한다.
 

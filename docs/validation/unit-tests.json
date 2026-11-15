@@ -1,15 +1,27 @@
 {
-  "tests": 37.0,
+  "tests": 39.0,
   "failures": 0.0,
   "errors": 0.0,
   "suites": [
+    {
+      "suite": "dev.pleos.boss.game.ArmorGrowthTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-11-15T10:30:13",
+      "testCases": [
+        "equippingAndUpgradingArmorReducesBossHpFasterWithoutResettingGear",
+        "armorCannotBeUpgradedWhileDriving"
+      ]
+    },
     {
       "suite": "dev.pleos.boss.game.AutoCombatTest",
       "tests": 7,
       "failures": 0,
       "errors": 0,
       "skipped": 0,
-      "timestamp": "2026-11-13T06:17:17",
+      "timestamp": "2026-11-15T10:30:13",
       "testCases": [
         "continuousHuntAdvancesPastTwoBosses",
         "anOldHeroSaveDefaultsTheDamageRemainder",
@@ -26,7 +38,7 @@
       "failures": 0,
       "errors": 0,
       "skipped": 0,
-      "timestamp": "2026-11-13T06:17:30",
+      "timestamp": "2026-11-15T10:30:13",
       "testCases": [
         "oldSaveWithoutEconomyDefaultsSafely",
         "cancelledDepositRefundsOnlyOnce",
@@ -48,7 +60,7 @@
       "failures": 0,
       "errors": 0,
       "skipped": 0,
-      "timestamp": "2026-11-13T06:17:40",
+      "timestamp": "2026-11-15T10:30:13",
       "testCases": [
         "pityUsesChestGenerationNotOpeningOrder",
         "nonParkedMutationsFailWithoutChangingState",
@@ -63,7 +75,7 @@
       "failures": 0,
       "errors": 0,
       "skipped": 0,
-      "timestamp": "2026-11-13T06:17:42",
+      "timestamp": "2026-11-15T10:30:13",
       "testCases": [
         "firstReadingNeverRewardsVehicleLifetimeMileage",
         "distanceStrikeUsesDepartureAttackAndOnlyHitsOnce",

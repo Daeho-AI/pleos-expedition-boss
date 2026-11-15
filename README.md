@@ -4,9 +4,19 @@
 
 Pleos 차량 화면에서 즐기는 앱입니다. 출발하면 게임 화면과 전투가 중단됩니다. 주차 후 돌아오면 비운 시간의 보상을 받고, 주행거리만큼 강해지는 필살의 일격을 날립니다. 충전하거나 누군가를 기다리는 동안에는 자동 사냥과 장비 육성을 즐길 수 있습니다.
 
-**[Windows 시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.6.1-preview.1/ExpeditionBoss-Windows-Demo.zip)** · **[APK와 전체 다운로드](https://github.com/Daeho-AI/pleos-expedition-boss/releases/tag/v0.6.1-preview.1)** · [공모전 설명](docs/CONTEST.md)
+**[Windows 시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/ExpeditionBoss-Windows-Demo.zip)** · **[APK와 전체 다운로드](https://github.com/Daeho-AI/pleos-expedition-boss/releases/tag/v0.7.0-preview.1)** · [공모전 설명](docs/CONTEST.md)
+
+## 앱 화면 0.7.0
+
+주간·야간 모드는 차량 설정을 따릅니다. 원정 화면에는 현재 캐릭터와 다음 보스, 이동 보너스, 받은 상자만 남겼습니다. 장비는 장착 중인 순서로 정렬하고, 선택하면 외형과 능력치가 바뀌는 모습을 미리 볼 수 있습니다.
+
+![차량 화면과 어울리는 원정 화면](artifacts/screenshots/ui-home-light.png)
+
+[새 UI 미리보기](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/ExpeditionBoss-UI-Preview.mp4) · [화면 구성과 검증](docs/validation/UPGRADE_0_7.md)
 
 ## 차량에서 사용하는 90초 시연
+
+아래 영상은 0.6.1 화면입니다. 주행 중 중단·이동거리 일격·보상 규칙은 0.7.0에서도 같습니다.
 
 [![주행 중 게임 차단과 주차 후 성장 기능 시연](artifacts/screenshots/demo-90s-poster.jpg)](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.6.1-preview.1/ExpeditionBoss-90s-Demo.mp4)
 
@@ -38,15 +48,18 @@ Pleos 차량 화면에서 즐기는 앱입니다. 출발하면 게임 화면과 
 
 12종 장비·4개 등급·+10 강화·20레벨·6종 보스 도감, 상점, 친구·교환을 구현했습니다. 친구 기능은 포함된 PC 서버로 체험할 수 있습니다.
 
-## 0.6.1 확인 내용
+## 0.7.0 변경 내용
 
-- SDK의 새 주차 상태와 화면 갱신 시각을 비교할 때 발생하던 화면 초기화를 수정했습니다.
-- 공식 Pleos 에뮬레이터에서 주행 중 게임 차단과 주차 후 복귀를 다시 촬영했습니다.
-- 차량 사용 순서에 맞춰 시연 영상과 설명을 정리했습니다.
+- 주간·야간 테마, 중립색 중심의 메뉴, 큰 터치 영역으로 화면을 정리했습니다.
+- 안내 문구와 연결 진단을 설정으로 옮겼습니다. 주행거리 보너스의 자세한 조건은 정보 버튼으로 확인합니다.
+- 보상을 받은 상자와 획득 기록으로 나누고, 장비의 장착·강화·미리보기 흐름을 다듬었습니다.
+- 전투 장면에서는 보스 체력, 캐릭터 장비와 자동 사냥 조작에 집중합니다.
+- 방어구도 기본 공격력과 강화 효과가 자동 사냥에 반영됩니다. 기존 장비와 강화 단계는 유지됩니다.
+- 좁은 창에서는 메뉴와 장비 상세 화면의 배치를 바꿉니다.
 
-[차량 연동 검증](docs/validation/SDK_VALIDATION.md) · [0.6.1 수정·검증](docs/validation/UPGRADE_0_6_1.md) · [전투 화면과 보상 흐름](docs/validation/UPGRADE_0_6.md)
+[차량 연동 검증](docs/validation/SDK_VALIDATION.md) · [0.7.0 검증](docs/validation/UPGRADE_0_7.md)
 
-공모전 제출용 파일은 **[모아_원정보스_release.apk](apk/모아_원정보스_release.apk)**입니다. 영문 APK와 내용·서명이 같은 0.6.1 파일입니다.
+공모전 제출용 파일은 **[모아_원정보스_release.apk](apk/모아_원정보스_release.apk)**입니다. 영문 APK와 내용·서명이 같은 0.7.0 파일입니다.
 
 ## 설치하고 실행하기
 
@@ -57,8 +70,8 @@ Pleos 차량 화면에서 즐기는 앱입니다. 출발하면 게임 화면과 
 1. 위 **Windows 시연 ZIP**을 받아 `D:\Codex\ExpeditionBoss` 같은 폴더에 **압축을 모두 푼다**.
 2. 최초 한 번 `setup.cmd`를 더블클릭한다. 필요한 JDK·Android 도구·공식 Pleos 에뮬레이터 이미지와 친구 서버를 준비하고 게임을 연다. 기존 도구는 재사용한다.
 3. 다음부터는 `demo.cmd`를 더블클릭한다. 친구 서버도 PC에서 자동으로 켜진다. 꺼진 기기를 준비하는 데 PC 상태에 따라 몇 분이 걸릴 수 있다.
-4. 게임의 **원정 화면을 아래로 스크롤 → 7분 비움 · 10km 복귀**를 누른다. 주행 중 중단, 복귀 정산, 필살기 적용을 몇 초 안에 체험한다. 시간과 거리는 명시적인 시연 입력이다.
-5. 자동 사냥이 이어지는 동안 **상자 → 장비 → 도감**에서 보상을 열고 육성을 진행한다.
+4. 게임의 **설정 → 7분 · 10 km 이동 시연**를 누른다. 주행 중 중단, 복귀 정산, 필살기 적용을 몇 초 안에 체험한다. 시간과 거리는 명시적인 시연 입력이다.
+5. 자동 사냥이 이어지는 동안 **보상 → 장비 → 도감**에서 보상을 열고 육성을 진행한다.
 
 ZIP에는 시연 APK가 포함된다. Git으로 소스를 받은 경우에도 `setup.cmd`가 같은 APK를 Releases에서 내려받아 SHA-256을 확인한다. APK는 Windows 실행 파일이 아니므로 APK만 더블클릭하면 게임이 열리지 않는다.
 
@@ -71,8 +84,8 @@ ZIP에는 시연 APK가 포함된다. Git으로 소스를 받은 경우에도 `s
 | 파일 | 용도 | 설치 ID |
 |---|---|---|
 | [Daeho-AI_ExpeditionBoss_release.apk](apk/Daeho-AI_ExpeditionBoss_release.apk) | 실제 SDK 사용, 서명된 release 빌드 | `dev.pleos.entry.boss` |
-| [boss-fixture-debug.apk](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.6.1-preview.1/boss-fixture-debug.apk) | 게임 체험, 가상 운행 버튼 제공 | `dev.pleos.entry.boss.fixture` |
-| [boss-pleos-debug.apk](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.6.1-preview.1/boss-pleos-debug.apk) | SDK 진단·개발 도구용 | `dev.pleos.entry.boss` |
+| [boss-fixture-debug.apk](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/boss-fixture-debug.apk) | 게임 체험, 가상 운행 버튼 제공 | `dev.pleos.entry.boss.fixture` |
+| [boss-pleos-debug.apk](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/boss-pleos-debug.apk) | SDK 진단·개발 도구용 | `dev.pleos.entry.boss` |
 
 시연과 SDK 앱의 저장 공간은 분리된다. SDK debug와 release는 서명이 달라 서로 덮어쓸 수 없다. 새 테스트 기기를 사용한다. 서명키는 저장소에 포함하지 않는다. `release`는 빌드 종류이며 상용 출시 승인을 뜻하지 않는다.
 
@@ -81,12 +94,12 @@ ZIP에는 시연 APK가 포함된다. Git으로 소스를 받은 경우에도 `s
 adb install -r .\apk\Daeho-AI_ExpeditionBoss_release.apk
 ```
 
-주차 상태에서 **차량 데이터 권한 확인**을 누르고 필요한 권한을 허용한 뒤 자동 사냥을 켠다. Pleos의 `CAR_DRIVE`는 Manifest에 선언하는 일반 권한이며 별도 승인 팝업을 요청하지 않는다. 실제 거리 지원 여부와 수신값은 **연결** 화면에서 확인한다. 에뮬레이터의 차량 데이터 시험에는 [공식 Virtual Console](https://document.pleos.ai/en/docs/connect/guide/getting-started/application-development/use-vehicle-emulator)의 활성 세션이 필요할 수 있다. 게임 체험에는 fixture APK를 선택한다.
+주차 상태에서 **차량 데이터 권한 확인**을 누르고 필요한 권한을 허용한 뒤 자동 사냥을 켠다. Pleos의 `CAR_DRIVE`는 Manifest에 선언하는 일반 권한이며 별도 승인 팝업을 요청하지 않는다. 실제 거리 지원 여부와 수신값은 **설정 → 차량 연결**에서 확인한다. 에뮬레이터의 차량 데이터 시험에는 [공식 Virtual Console](https://document.pleos.ai/en/docs/connect/guide/getting-started/application-development/use-vehicle-emulator)의 활성 세션이 필요할 수 있다. 게임 체험에는 fixture APK를 선택한다.
 
 ## 친구와 교환하는 순서
 
-1. 두 사용자 모두 **같은 서버 주소**에 연결하고 각자의 닉네임을 만든다.
-2. **친구·교환 → 친구**에서 코드를 보내고, 받은 사람이 수락한다.
+1. 두 사용자 모두 **친구 → 연결 설정**에서 같은 서버 주소를 입력하고 각자의 닉네임을 만든다.
+2. **친구 → 친구**에서 코드를 보내고, 받은 사람이 수락한다.
 3. **교환함**에 서로 교환할 장비를 맡긴다. 장착 중이면 먼저 장착을 해제한다.
 4. **교환**에서 친구, 내가 줄 장비, 받을 장비를 고르고 제안한다.
 5. 상대가 내용을 확인하고 수락하면 교환함의 소유권이 동시에 바뀐다.
@@ -106,7 +119,7 @@ adb install -r .\apk\Daeho-AI_ExpeditionBoss_release.apk
 
 | 보상 | 장비 | 도감 |
 |---|---|---|
-| ![상자 보상](artifacts/screenshots/03-rewards.png) | ![장비 장착](artifacts/screenshots/04-equipment.png) | ![보스 도감](artifacts/screenshots/05-collection.png) |
+| ![상자 보상](artifacts/screenshots/ui-rewards.png) | ![장비 장착](artifacts/screenshots/ui-equipment.png) | ![보스 도감](artifacts/screenshots/ui-collection.png) |
 
 기본 공격력은 레벨과 장비로 결정한다. 게임을 비운 동안 전투를 실행하지 않고, 복귀할 때 저장한 시각과 캐릭터 상태로 결과를 계산한다. 같은 부팅 안에서는 단조 증가 시계를 사용하고, 기기를 재부팅하면 벽시계 경과 시간을 상한 내에서 사용한다. 시간을 뒤로 돌린 구간에는 보상을 추가하지 않는다. 이는 로컬 저장 방식이며 서버 기반 부정행위 방지를 완성한 것은 아니다. 장비 변경과 상자 개봉은 **P 기어 + UX 제한 해제** 상태에서만 가능하다.
 
@@ -154,7 +167,7 @@ python .\tools\prepare_release_signing.py
 powershell -ExecutionPolicy Bypass -File .\tools\build_release.ps1
 ```
 
-현재 변경의 검증 범위는 [0.6.0 검증 기록](docs/validation/UPGRADE_0_6.md), 복귀 정산·필살기는 [0.3.0 기록](docs/validation/UPGRADE_0_3.md), 이전 상점·친구·교환 시험은 [0.2.0 기록](docs/validation/UPGRADE_0_2.md)에 정리한다. 차량 API의 버전별 연결 기록은 [SDK 검증 기록](docs/validation/SDK_VALIDATION.md)에 있다. SDK 다운로드·저장소 접근 조건이 변경되면 [Pleos 개발자 사이트](https://developers.pleos.ai/playground?locale=ko-KR)의 현재 안내를 따른다.
+현재 화면·방어구 성장 변경의 검증 범위는 [0.7.0 검증 기록](docs/validation/UPGRADE_0_7.md), 전투 전환은 [0.6.0 기록](docs/validation/UPGRADE_0_6.md), 복귀 정산·필살기는 [0.3.0 기록](docs/validation/UPGRADE_0_3.md), 이전 상점·친구·교환 시험은 [0.2.0 기록](docs/validation/UPGRADE_0_2.md)에 정리한다. 차량 API의 버전별 연결 기록은 [SDK 검증 기록](docs/validation/SDK_VALIDATION.md)에 있다. SDK 다운로드·저장소 접근 조건이 변경되면 [Pleos 개발자 사이트](https://developers.pleos.ai/playground?locale=ko-KR)의 현재 안내를 따른다.
 
 | 소스 | 역할 |
 |---|---|

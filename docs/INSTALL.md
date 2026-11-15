@@ -4,7 +4,7 @@ Windows 자동 설치는 D드라이브를 전제로 한다. 다른 운영체제�
 
 ## 첫 설치
 
-1. [Windows 시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.3.0-preview.1/ExpeditionBoss-Windows-Demo.zip)을 `D:\Codex\ExpeditionBoss`에 압축 해제한다.
+1. [Windows 시연 ZIP](https://github.com/Daeho-AI/pleos-expedition-boss/releases/download/v0.7.0-preview.1/ExpeditionBoss-Windows-Demo.zip)을 `D:\Codex\ExpeditionBoss`에 압축 해제한다.
 2. Python 3.11 이상을 설치한다. `py -3 --version` 또는 `python --version`으로 확인한다.
 3. `setup.cmd`를 실행한다. 최초 다운로드는 네트워크에 따라 오래 걸릴 수 있다. 완료 후 게임 창이 열린다.
 4. 다음에는 `demo.cmd`로 실행한다.
@@ -14,6 +14,8 @@ Windows 자동 설치는 D드라이브를 전제로 한다. 다른 운영체제�
 ZIP에는 Google·현대의 SDK나 에뮬레이터 이미지를 재배포하지 않는다. 설치기가 공식 배포처에서 받으며 각 구성요소의 이용 조건이 적용된다. 네트워크나 배포처 접근 제한이 있으면 중단한다.
 
 ## 문제 해결
+
+0.7.0 실행기는 에뮬레이터의 Vulkan을 끈 상태로 시작한다. Windows/Intel 환경에서 발생한 에뮬레이터 실행기 종료를 피하기 위한 설정이며 게임 데이터나 Windows 그래픽 설정은 바꾸지 않는다. 이 환경의 화면 검증은 `-gpu host -feature -Vulkan`로 진행했다. [Android 공식 문제 해결 안내](https://developer.android.com/studio/run/emulator-troubleshooting)를 참고한다.
 
 | 증상 | 확인할 내용 |
 |---|---|

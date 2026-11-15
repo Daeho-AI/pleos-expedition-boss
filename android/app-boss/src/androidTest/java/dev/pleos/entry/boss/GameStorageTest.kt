@@ -137,6 +137,7 @@ class FixtureJourneyUiTest {
         val graph=(compose.activity.application as BossApplication).graph
         compose.waitUntil(10_000){graph.repository.ready.isCompleted}
         compose.onNodeWithTag("screen-home").assertExists()
+        compose.onNodeWithTag("nav-settings").performClick()
         compose.onNodeWithTag("fixture-run").performScrollTo().performClick()
         compose.waitUntil(45_000){!graph.fixtureRunning.value&&graph.repository.state.value.unopened.isNotEmpty()}
         compose.onNodeWithTag("return-summary").performScrollTo()
@@ -153,6 +154,7 @@ class FixtureJourneyUiTest {
         compose.onNodeWithTag("nav-collection").performClick()
         compose.onNodeWithTag("screen-collection").assertExists()
         screenshot("05-collection")
+        compose.onNodeWithTag("nav-settings").performClick()
         compose.onNodeWithTag("nav-diagnostics").performScrollTo().performClick()
         compose.onNodeWithTag("screen-diagnostics").assertExists()
         screenshot("06-diagnostics")
@@ -208,7 +210,7 @@ class FixtureJourneyUiTest {
         compose.onNodeWithTag("enter-battle").performScrollTo().performClick()
         compose.waitUntil(10_000){compose.onAllNodesWithTag("battle-scene").fetchSemanticsNodes().isNotEmpty()}
         compose.onNodeWithTag("battle-scene").assertExists()
-        compose.onNodeWithText("밤빛 마법탄  ·  "+graph.balance.template(staff.templateId).name+" +3").assertExists()
+        compose.onNodeWithText(graph.balance.template(staff.templateId).name+" +3").assertExists()
     }
     @Test fun leavingAppStopsCombatUntilForegroundReturn() {
         Assume.assumeTrue(BuildConfig.IS_FIXTURE)

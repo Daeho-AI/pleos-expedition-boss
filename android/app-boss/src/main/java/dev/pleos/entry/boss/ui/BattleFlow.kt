@@ -89,16 +89,16 @@ private enum class BattlePage { ARRIVAL, ARENA, VICTORY, REWARD }
         }
         Row(Modifier.fillMaxWidth().padding(24.dp),verticalAlignment=Alignment.CenterVertically){
             FilledTonalButton(onClick={navigate("home")},modifier=Modifier.heightIn(min=64.dp).testTag("exit-battle"),shape=RoundedCornerShape(16.dp)){
-                Icon(Icons.Default.ArrowBack,null,Modifier.size(21.dp));Spacer(Modifier.width(10.dp));Text("원정 기지",fontSize=16.sp)
+                Icon(Icons.Default.ArrowBack,null,Modifier.size(21.dp));Spacer(Modifier.width(10.dp));Text("원정",fontSize=19.sp)
             }
             Spacer(Modifier.weight(1f))
-            BadgePill(if(BuildConfig.IS_FIXTURE)"PLEOS · 주차 / 시연 데이터" else "PLEOS · 주차 확인",Mint)
+            Text(if(BuildConfig.IS_FIXTURE)"주차 중 · 시연" else "주차 중",color=Muted,fontSize=18.sp)
         }
         if(page==BattlePage.ARENA){
             Row(Modifier.align(Alignment.BottomEnd).padding(24.dp),horizontalArrangement=Arrangement.spacedBy(12.dp)){
                 FilledTonalButton(onClick={graph.setEnabled(!game.hero.autoExpeditionEnabled)},modifier=Modifier.heightIn(min=64.dp).testTag("enable-expedition")){
                     Icon(if(game.hero.autoExpeditionEnabled)Icons.Default.Pause else Icons.Default.PlayArrow,null)
-                    Spacer(Modifier.width(8.dp));Text(if(game.hero.autoExpeditionEnabled)"자동 사냥 중" else "사냥 재개")
+                    Spacer(Modifier.width(8.dp));Text(if(game.hero.autoExpeditionEnabled)"자동 사냥" else "재개",fontSize=19.sp)
                 }
             }
         }
@@ -114,12 +114,11 @@ private enum class BattlePage { ARRIVAL, ARENA, VICTORY, REWARD }
         ArenaBackdrop(index,Modifier.fillMaxSize())
         Box(Modifier.fillMaxSize().background(Color(0xA607101C)))
         Column(Modifier.align(Alignment.Center).widthIn(max=640.dp).fillMaxWidth().padding(28.dp),horizontalAlignment=Alignment.CenterHorizontally){
-            Text("B O S S   E N C O U N T E R",color=tone.light,fontSize=16.sp,fontWeight=FontWeight.Bold)
+            Text("보스 등장",color=tone.light,fontSize=16.sp,fontWeight=FontWeight.Bold)
             BossArt(index,Modifier.fillMaxWidth().height(280.dp))
-            Text(b.bosses[index].name,color=Color.White,fontSize=46.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
+            Text(b.bosses[index].name,color=Color.White,fontSize=38.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
             Spacer(Modifier.height(14.dp));Text(tone.name+"  /  "+(index+1).toString().padStart(2,'0')+"구역",color=Muted,fontSize=20.sp)
             Spacer(Modifier.height(32.dp));LinearProgressIndicator(progress=reveal.value,modifier=Modifier.width(250.dp).height(3.dp),color=tone.light,trackColor=Edge)
-            Spacer(Modifier.height(16.dp));Text("원정 구역으로 진입합니다",color=Muted,fontSize=14.sp)
         }
     }
 }
@@ -132,9 +131,9 @@ private enum class BattlePage { ARRIVAL, ARENA, VICTORY, REWARD }
         Box(Modifier.fillMaxSize().background(Color(0xC008141D)))
         Column(Modifier.align(Alignment.Center).padding(28.dp),horizontalAlignment=Alignment.CenterHorizontally){
             Icon(Icons.Default.EmojiEvents,null,tint=Gold,modifier=Modifier.size(90.dp))
-            Spacer(Modifier.height(20.dp));Text("VICTORY",fontSize=64.sp,fontWeight=FontWeight.Black,color=Gold,letterSpacing=7.sp)
-            Spacer(Modifier.height(12.dp));Text(name+" 처치",fontSize=28.sp,fontWeight=FontWeight.Bold)
-            Spacer(Modifier.height(30.dp));Text("보상 상자 확보",color=Mint,fontSize=20.sp)
+            Spacer(Modifier.height(20.dp));Text("처치 완료",fontSize=48.sp,fontWeight=FontWeight.Bold,color=Gold)
+            Spacer(Modifier.height(12.dp));Text(name,fontSize=28.sp,fontWeight=FontWeight.Bold)
+            Spacer(Modifier.height(30.dp));Text("상자 +1",color=Muted,fontSize=20.sp)
             Spacer(Modifier.height(20.dp));LinearProgressIndicator(progress=sweep.value,modifier=Modifier.width(220.dp).height(3.dp),color=Gold,trackColor=Edge)
         }
     }
@@ -144,10 +143,10 @@ private enum class BattlePage { ARRIVAL, ARENA, VICTORY, REWARD }
     val opened=chest?.openedAt!=null
     val template=chest?.let{graph.balance.template(it.templateId)}
     val equipped=chest!=null&&game.equipped[template!!.slot]==chest.templateId+":"+chest.rarity.name
-    Box(modifier.background(androidx.compose.ui.graphics.Brush.radialGradient(listOf(Color(0xFF20374A),Color(0xFF0C1623)))).testTag("battle-reward")){
+    Box(modifier.background(Night).testTag("battle-reward")){
         Column(Modifier.align(Alignment.Center).widthIn(max=680.dp).fillMaxWidth().padding(horizontal=32.dp,vertical=112.dp).verticalScroll(rememberScrollState()),horizontalAlignment=Alignment.CenterHorizontally){
-            Text(if(opened)"원정의 전리품" else "보스가 남긴 보물",fontSize=36.sp,fontWeight=FontWeight.Bold)
-            Spacer(Modifier.height(8.dp));Text(if((chest?.convertedDust?:0)>0)"중복 장비는 강화 재료가 됩니다" else if(opened)"획득한 장비로 다음 구역에 도전하세요" else "상자는 보관됩니다. 지금 열어 장비를 확인하세요",color=Muted,fontSize=17.sp,textAlign=TextAlign.Center)
+            Text(if(opened)"보상 획득" else "보스 상자",fontSize=36.sp,fontWeight=FontWeight.Bold)
+            Spacer(Modifier.height(8.dp));Text(if((chest?.convertedDust?:0)>0)"중복 장비를 강화 가루로 받았습니다" else if(opened)"가방에 보관했습니다" else "열어서 새 장비를 확인하세요",color=Muted,fontSize=18.sp,textAlign=TextAlign.Center)
             AnimatedContent(targetState=opened,transitionSpec={fadeIn(tween(450))+scaleIn(tween(550),initialScale=.65f) togetherWith fadeOut(tween(180))},label="chest reveals real item") { revealed->
                 if(revealed&&chest!=null&&template!=null)EquipmentArt(Equipment(chest.templateId,chest.rarity),template.slot,Modifier.size(260.dp))
                 else ChestArt(Gold,Modifier.size(260.dp))
@@ -158,14 +157,14 @@ private enum class BattlePage { ARRIVAL, ARENA, VICTORY, REWARD }
                 Spacer(Modifier.height(12.dp));Text("코인 +"+chest.coins+"    도감 조각 +1"+(if(chest.convertedDust>0)"    강화 가루 +"+chest.convertedDust else ""),color=Gold,fontSize=18.sp,textAlign=TextAlign.Center)
                 Spacer(Modifier.height(10.dp));Text(comparison(game,graph.balance,chest.templateId+":"+chest.rarity.name,template.slot),color=Muted,fontSize=16.sp)
                 Spacer(Modifier.height(26.dp));Row(horizontalArrangement=Arrangement.spacedBy(12.dp)){
-                    ActionButton(if(equipped)"장착 완료" else "장착하기",onEquip,Modifier.weight(1f).testTag("battle-equip-reward"),!busy&&!equipped)
-                    OutlinedButton(onClick=onGear,modifier=Modifier.weight(1f).heightIn(min=64.dp)){Text("장비 · 강화")}
+                    ActionButton(if(equipped)"장착 완료" else "장착",onEquip,Modifier.weight(1f).testTag("battle-equip-reward"),!busy&&!equipped)
+                    OutlinedButton(onClick=onGear,modifier=Modifier.weight(1f).heightIn(min=64.dp)){Text("장비")}
                 }
             }else{
                 Spacer(Modifier.height(20.dp));ActionButton("상자 열기",onOpen,Modifier.fillMaxWidth().testTag("battle-open-reward"),!busy&&chest!=null)
             }
             Spacer(Modifier.height(14.dp));OutlinedButton(onClick=onNext,modifier=Modifier.fillMaxWidth().heightIn(min=64.dp).testTag("battle-next")){
-                Text(if(inspecting)"다음 보스에 도전" else "다음 보스  ·  "+countdown+"초 후 자동 진입",fontSize=17.sp)
+                Text(if(inspecting)"다음 보스" else "다음 보스 · "+countdown+"초",fontSize=17.sp)
                 Spacer(Modifier.width(12.dp));Icon(Icons.Default.ArrowForward,null)
             }
         }

@@ -67,3 +67,23 @@ docs/validation/*.txt
 !artifacts/screenshots/battle-split.png
 !docs/validation/sdk-visual-0.6.json
 !docs/validation/lint-0.6.txt
+
+# Reviewed 0.7.0 UI screenshots and validation evidence.
+!artifacts/screenshots/ui-home-light.png
+!artifacts/screenshots/ui-home-dark.png
+!artifacts/screenshots/ui-home-narrow.png
+!artifacts/screenshots/ui-equipment.png
+!artifacts/screenshots/ui-equipment-dialog.png
+!artifacts/screenshots/ui-rewards.png
+!artifacts/screenshots/ui-shop.png
+!artifacts/screenshots/ui-friends.png
+!artifacts/screenshots/ui-collection.png
+!artifacts/screenshots/ui-battle.png
+!artifacts/screenshots/ui-loot.png
+!docs/validation/contrast-0.7.0.json
+!docs/validation/layout-0.7.0.json
+!docs/validation/video-0.7.0.json
+!docs/validation/video-timeline-0.7.0.json
+!docs/validation/instrumentation-fixture-tests-0.7.0.txt
+!docs/validation/instrumentation-sdk-tests-0.7.0.txt
+!docs/validation/lint-0.7.0.txt

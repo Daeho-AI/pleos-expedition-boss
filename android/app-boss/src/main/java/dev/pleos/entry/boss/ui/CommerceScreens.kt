@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -33,11 +34,11 @@ private fun itemLabel(item: Equipment, balance: Balance): String {
 }
 @Composable private fun PageHeading(title: String, subtitle: String) {
     Text(title,fontSize=30.sp,fontWeight=FontWeight.Bold)
-    Spacer(Modifier.height(8.dp));Text(subtitle,color=Muted);Spacer(Modifier.height(18.dp))
+    if(subtitle.isNotBlank()){Spacer(Modifier.height(8.dp));Text(subtitle,color=Muted)};Spacer(Modifier.height(18.dp))
 }
 @Composable private fun Switches(values: List<String>, selected: String, choose: (String)->Unit) {
     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-        values.forEach { value -> FilterChip(selected=selected==value,onClick={choose(value)},label={Text(value)},modifier=Modifier.heightIn(min=56.dp)) }
+        values.forEach { value -> FilterChip(selected=selected==value,onClick={choose(value)},label={Text(value)},modifier=Modifier.heightIn(min=64.dp)) }
     }
     Spacer(Modifier.height(16.dp))
 }
@@ -45,11 +46,11 @@ private fun itemLabel(item: Equipment, balance: Balance): String {
     var tab by rememberSaveable { mutableStateOf("재료") }
     var confirmation by remember { mutableStateOf<Confirmation?>(null) }
     Column(Modifier.fillMaxSize().testTag("screen-shop")) {
-        PageHeading("원정 상점", "모은 코인으로 필요한 장비와 조각을 직접 고르세요.")
+        PageHeading("상점", "")
         Switches(listOf("재료","장비","조각","판매","기록"),tab){tab=it}
         LazyColumn(verticalArrangement=Arrangement.spacedBy(12.dp),modifier=Modifier.weight(1f)) {
             if (tab == "판매") {
-                if (game.equipment.isEmpty()) item { Text("판매할 장비가 없어요. 원정 보상을 먼저 열어 보세요.",color=Muted) }
+                if (game.equipment.isEmpty()) item { Text("판매할 장비가 없습니다.",color=Muted) }
                 items(game.equipment,key={it.key}) { item ->
                     val worn = item.key in game.equipped.values
                     CardBox(Modifier.fillMaxWidth()) {
@@ -62,7 +63,7 @@ private fun itemLabel(item: Equipment, balance: Balance): String {
                     }
                 }
             } else if (tab == "기록") {
-                if(game.economy.history.isEmpty())item{Text("상점 거래 내역이 여기에 남아요.",color=Muted)}
+                if(game.economy.history.isEmpty())item{Text("아직 거래 내역이 없습니다.",color=Muted)}
                 items(game.economy.history.asReversed()) { event -> CardBox(Modifier.fillMaxWidth()) {
                     Text((if(event.kind=="BUY")"구매 · " else "판매 · ")+event.label,fontSize=20.sp)
                     Text("${if(event.coins>0)"+" else ""}${event.coins} 코인",color=Gold)
@@ -75,11 +76,20 @@ private fun itemLabel(item: Equipment, balance: Balance): String {
                     val levelOk = game.hero.level>=product.level
                     CardBox(Modifier.fillMaxWidth()) {
                         Row(verticalAlignment=Alignment.CenterVertically) {
+                            Box(Modifier.size(88.dp),contentAlignment=Alignment.Center){
+                                when{
+                                    product.equipment!=null->EquipmentArt(product.equipment!!,graph.balance.template(product.equipment!!.templateId).slot,Modifier.size(84.dp))
+                                    product.bossId!=null->BossArt(graph.balance.bosses.indexOfFirst{it.id==product.bossId},Modifier.size(84.dp))
+                                    else->androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Default.AutoAwesome,null,tint=Gold,modifier=Modifier.size(36.dp))
+                                }
+                            }
+                            Spacer(Modifier.width(20.dp))
                             Column(Modifier.weight(1f)) {
                                 Text(product.name,fontSize=22.sp,fontWeight=FontWeight.SemiBold)
-                                Text(product.description+(if(product.level>1)" · Lv.${product.level}" else ""),color=Muted)
+                                Text(product.description.replace(" · 확정 장비", "").replace(" · 해금 전까지", "")+(if(product.level>1)" · Lv.${product.level}" else ""),color=Muted)
+                                if(levelOk&&!owned&&!complete&&game.hero.coins<product.price)Text("코인 부족",color=Muted,fontSize=16.sp)
                             }
-                            ActionButton(when{owned->"보유 중";complete->"해금 완료";!levelOk->"Lv.${product.level} 필요";else->"${product.price} 코인"},
+                            ActionButton(when{owned->"보유 중";complete->"수집 완료";!levelOk->"Lv.${product.level} 필요";else->"${product.price} 코인"},
                                 {confirmation=Confirmation(product.name+" 구매", "${product.price} 코인을 사용합니다. "+product.description){graph.buy(product.id)}},
                                 Modifier.testTag("buy-"+product.id),!busy&&!owned&&!complete&&levelOk&&game.hero.coins>=product.price)
                         }
@@ -104,31 +114,33 @@ private fun itemLabel(item: Equipment, balance: Balance): String {
     var giveId by rememberSaveable { mutableStateOf("") }
     var wantId by rememberSaveable { mutableStateOf("") }
     var confirmation by remember { mutableStateOf<Confirmation?>(null) }
+    var showServer by rememberSaveable { mutableStateOf(state.server.isBlank()) }
     val clipboard = LocalClipboardManager.current
     LaunchedEffect(controller) { while(true){controller.refresh();delay(10000)} }
     val snapshot = state.snapshot
     Column(Modifier.fillMaxSize().testTag("screen-friends")) {
-        PageHeading("함께 채우는 원정", "친구와 서로 필요한 장비를 교환하세요.")
+        PageHeading("친구", "")
         if(state.error!=null) {
             Text(state.error!!,color=MaterialTheme.colorScheme.error,modifier=Modifier.testTag("social-error"))
             Spacer(Modifier.height(10.dp))
         }
         if(state.profile == null) {
             CardBox(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
-                Text("친구 프로필 만들기",fontSize=22.sp,fontWeight=FontWeight.Bold)
-                Text("닉네임과 친구 코드로 연결합니다. 서로 수락한 친구에게 교환함의 장비가 공개됩니다.",color=Muted)
+                Text("친구와 장비를 교환하세요",fontSize=22.sp,fontWeight=FontWeight.Bold)
+                Text("닉네임을 만들고 친구를 추가하세요.",color=Muted)
                 Spacer(Modifier.height(16.dp))
                 OutlinedTextField(nickname,{nickname=it.take(20)},label={Text("닉네임")},singleLine=true,modifier=Modifier.fillMaxWidth().testTag("social-nickname"))
                 Spacer(Modifier.height(12.dp))
-                OutlinedTextField(server,{server=it},label={Text("친구와 함께 사용할 서버 주소")},singleLine=true,modifier=Modifier.fillMaxWidth().testTag("social-server"))
+                TextButton(onClick={showServer=!showServer},modifier=Modifier.heightIn(min=64.dp).testTag("social-server-settings")){Text("연결 설정")}
+                if(showServer)OutlinedTextField(server,{server=it},label={Text("서버 주소")},singleLine=true,modifier=Modifier.fillMaxWidth().testTag("social-server"))
                 Spacer(Modifier.height(16.dp))
-                ActionButton(if(busy)"연결하는 중…" else "친구 연결 시작",{controller.connect(server,nickname)},Modifier.testTag("social-connect"),!busy&&nickname.isNotBlank()&&server.isNotBlank())
+                ActionButton(if(busy)"연결하는 중…" else "시작하기",{controller.connect(server,nickname)},Modifier.testTag("social-connect"),!busy&&nickname.isNotBlank()&&server.isNotBlank())
             }
         } else {
             Row(verticalAlignment=Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(state.profile!!.nickname+" · 친구 코드 "+state.profile!!.code,fontSize=22.sp,fontWeight=FontWeight.SemiBold)
-                    Text("같은 서버를 사용하는 친구에게 코드를 알려 주세요.",color=Muted)
+                    Text("친구에게 내 코드를 알려 주세요.",color=Muted)
                 }
                 TextButton({clipboard.setText(AnnotatedString(state.profile!!.code))},modifier=Modifier.heightIn(min=64.dp)){Text("코드 복사")}
                 ActionButton(if(busy)"연결 중…" else "새로고침",controller::refresh,enabled=!busy)
@@ -137,7 +149,7 @@ private fun itemLabel(item: Equipment, balance: Balance): String {
             LazyColumn(verticalArrangement=Arrangement.spacedBy(14.dp),modifier=Modifier.weight(1f)) {
                 if(tab=="연결 정보") item {
                     CardBox(Modifier.fillMaxWidth()) { Text("연결된 서버",color=Muted);Text(state.server)
-                        Spacer(Modifier.height(12.dp));Text("친구와 교환함은 이 서버에 저장됩니다. 서버가 꺼져 있어도 원정과 상점은 이용할 수 있어요.") }
+                        Spacer(Modifier.height(12.dp));Text("친구와 교환함은 이 서버에 저장됩니다. 연결이 끊겨도 원정과 상점은 이용할 수 있습니다.") }
                 }
                 if(tab=="친구") {
                     item { CardBox(Modifier.fillMaxWidth()) {
@@ -155,7 +167,7 @@ private fun itemLabel(item: Equipment, balance: Balance): String {
                             } else TextButton({controller.friendRequest(req.id,"cancel")},enabled=!busy,modifier=Modifier.heightIn(min=64.dp)){Text("요청 취소")}
                         }
                     } }
-                    if(snapshot?.friends.isNullOrEmpty())item{Text("아직 연결된 친구가 없어요. 친구 코드를 주고받아 보세요.",color=Muted)}
+                    if(snapshot?.friends.isNullOrEmpty())item{Text("아직 친구가 없습니다.",color=Muted)}
                     items(snapshot?.friends?:emptyList(),key={it.id}) { friend -> CardBox(Modifier.fillMaxWidth()) {
                         Row(verticalAlignment=Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)){Text(friend.nickname,fontSize=22.sp);Text("교환함 장비 ${friend.items.size}개",color=Muted)}
@@ -169,12 +181,12 @@ private fun itemLabel(item: Equipment, balance: Balance): String {
                     items(game.economy.deposits,key={it.id}) { pending -> CardBox(Modifier.fillMaxWidth()) {
                         Text(itemLabel(pending.item,graph.balance));Text("전송 확인 대기 · 장비는 보관 중",color=Gold)
                         Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-                            ActionButton("전송 다시 확인",controller::refresh,enabled=!busy)
-                            TextButton({controller.abortDeposit(pending.id)},enabled=!busy,modifier=Modifier.heightIn(min=64.dp)){Text("전송 취소 확인")}
+                            ActionButton("다시 확인",controller::refresh,enabled=!busy)
+                            TextButton({controller.abortDeposit(pending.id)},enabled=!busy,modifier=Modifier.heightIn(min=64.dp)){Text("취소 확인")}
                         }
                     } }
                     item { Text("교환함의 장비",fontSize=22.sp,fontWeight=FontWeight.Bold) }
-                    if(snapshot?.inventory.isNullOrEmpty())item{Text("아래 가방에서 교환할 장비를 맡겨 주세요.",color=Muted)}
+                    if(snapshot?.inventory.isNullOrEmpty())item{Text("교환할 장비를 가방에서 선택하세요.",color=Muted)}
                     items(snapshot?.inventory?:emptyList(),key={it.id}) { held -> CardBox(Modifier.fillMaxWidth()) {
                         Row(verticalAlignment=Alignment.CenterVertically) {
                             Text(itemLabel(held.item,graph.balance),Modifier.weight(1f),fontSize=20.sp)
@@ -200,28 +212,28 @@ private fun itemLabel(item: Equipment, balance: Balance): String {
                     val want = friend?.items?.find{it.id==wantId&&!it.locked}
                     item { Text("새 교환 제안",fontSize=22.sp,fontWeight=FontWeight.Bold) }
                     item { Row(Modifier.horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(10.dp)) {
-                        snapshot?.friends?.forEach { f -> FilterChip(selectedFriend==f.id,{selectedFriend=f.id;wantId=""},label={Text(f.nickname)},modifier=Modifier.heightIn(min=56.dp)) }
+                        snapshot?.friends?.forEach { f -> FilterChip(selectedFriend==f.id,{selectedFriend=f.id;wantId=""},label={Text(f.nickname)},modifier=Modifier.heightIn(min=64.dp)) }
                     } }
                     if(friend!=null) {
                         item { Text("내가 줄 장비 · 교환함에서 선택",color=Gold) }
                         items(snapshot?.inventory?.filter{!it.locked}?:emptyList(),key={"give:"+it.id}) { held ->
-                            FilterChip(giveId==held.id,{giveId=held.id},label={Text(itemLabel(held.item,graph.balance))},modifier=Modifier.fillMaxWidth().heightIn(min=56.dp))
+                            FilterChip(giveId==held.id,{giveId=held.id},label={Text(itemLabel(held.item,graph.balance))},modifier=Modifier.fillMaxWidth().heightIn(min=64.dp))
                         }
                         item { Text("${friend.nickname}에게 받을 장비",color=Mint) }
                         items(friend.items.filter{!it.locked},key={"want:"+it.id}) { held ->
-                            FilterChip(wantId==held.id,{wantId=held.id},label={Text(itemLabel(held.item,graph.balance))},modifier=Modifier.fillMaxWidth().heightIn(min=56.dp))
+                            FilterChip(wantId==held.id,{wantId=held.id},label={Text(itemLabel(held.item,graph.balance))},modifier=Modifier.fillMaxWidth().heightIn(min=64.dp))
                         }
-                        item { ActionButton("선택한 장비로 교환 제안",{
-                            if(give!=null&&want!=null)confirmation=Confirmation("${friend.nickname}에게 제안", "주는 장비: ${itemLabel(give.item,graph.balance)}\n받는 장비: ${itemLabel(want.item,graph.balance)}\n상대가 수락하면 교환함에서 두 장비가 바뀝니다. 제안은 24시간 후 만료됩니다."){controller.offer(friend.id,give.id,want.id)}
+                        item { ActionButton("교환 제안",{
+                            if(give!=null&&want!=null)confirmation=Confirmation("${friend.nickname}에게 제안", "내 장비: ${itemLabel(give.item,graph.balance)}\n받을 장비: ${itemLabel(want.item,graph.balance)}\n상대가 수락하면 교환함에서 두 장비가 바뀝니다. 제안은 24시간 후 만료됩니다."){controller.offer(friend.id,give.id,want.id)}
                         },enabled=!busy&&give!=null&&want!=null) }
                         if(friend.items.none{!it.locked})item{Text("친구의 교환 가능한 장비가 없어요.",color=Muted)}
-                    } else item { Text("친구를 선택하고 두 사람의 장비를 골라 주세요. 먼저 교환함에 장비를 맡겨야 합니다.",color=Muted) }
-                    item { HorizontalDivider();Text("받은 제안과 교환 기록",fontSize=22.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(top=12.dp)) }
+                    } else item { Text("교환할 친구를 선택하세요.",color=Muted) }
+                    item { HorizontalDivider();Text("교환 내역",fontSize=22.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(top=12.dp)) }
                     items(snapshot?.trades?:emptyList(),key={it.id}) { trade -> CardBox(Modifier.fillMaxWidth()) {
                         Text("${trade.sender.nickname} → ${trade.recipient.nickname}",fontSize=20.sp,fontWeight=FontWeight.Bold)
-                        Text("주는 장비: "+itemLabel(if(trade.incoming)trade.want else trade.give,graph.balance),color=Gold)
-                        Text("받는 장비: "+itemLabel(if(trade.incoming)trade.give else trade.want,graph.balance),color=Mint)
-                        Text(when(trade.status){"ACCEPTED"->"교환 완료 · 교환함에서 받을 수 있어요";"DECLINED"->"거절됨";"CANCELLED"->"취소됨 · 장비 상태가 바뀐 경우도 포함";"EXPIRED"->"기간 만료";else->"상대 수락 대기"},color=Muted)
+                        Text("내 장비: "+itemLabel(if(trade.incoming)trade.want else trade.give,graph.balance),color=Gold)
+                        Text("받을 장비: "+itemLabel(if(trade.incoming)trade.give else trade.want,graph.balance),color=Mint)
+                        Text(when(trade.status){"ACCEPTED"->"교환 완료";"DECLINED"->"거절됨";"CANCELLED"->"취소됨";"EXPIRED"->"기간 만료";else->"상대 수락 대기"},color=Muted)
                         if(trade.status=="PENDING") Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
                             if(trade.incoming) {
                                 ActionButton("교환 수락",{confirmation=Confirmation("교환 수락", "내 장비 ${itemLabel(trade.want,graph.balance)}과 상대 장비 ${itemLabel(trade.give,graph.balance)}을 교환합니다."){controller.trade(trade.id,"accept")}},enabled=!busy)

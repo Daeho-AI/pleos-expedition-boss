@@ -1,10 +1,10 @@
 {
   "file": "Daeho-AI_ExpeditionBoss_release.apk",
   "applicationId": "dev.pleos.entry.boss",
-  "versionName": "0.6.1",
-  "versionCode": 7,
+  "versionName": "0.7.0",
+  "versionCode": 8,
   "buildType": "release",
   "debuggable": false,
-  "bytes": 45807741,
-  "sha256": "631f26e392fb8a3655e5396b490ff80e2bb8bd4114dbfa7d9c2a26d767ee227e"
+  "bytes": 45856909,
+  "sha256": "213f1b900d0e4a6dee0672ef283950356acea9fda2b01c464518366874758f4b"
 }

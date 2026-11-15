@@ -91,7 +91,7 @@ class BossGraph(val context: Context) {
             if (t is CancellationException) throw t
             fatalError.value = "저장 또는 연결 오류: " + (t.message ?: t.javaClass.simpleName)
             status.value = CombatStatus(BattleState.DATA_PAUSED, "저장을 확인할 때까지 원정을 멈췄어요")
-            messages.emit("기록을 저장하지 못했어요. 연결 화면을 확인해 주세요.")
+            messages.emit("저장하지 못했습니다. 설정에서 차량 연결을 확인해 주세요.")
         }
     }
     suspend fun tick() {
@@ -116,7 +116,7 @@ class BossGraph(val context: Context) {
                 repository.change(ids.id(), "enabled:" + enabled) {
                     ActionResult(engine.setEnabled(it, enabled, progressInput()), "", true)
                 }
-                messages.emit(if (enabled) "자동 사냥을 시작했어요. 주행 중에는 멈추고 복귀할 때 정산합니다." else "자동 사냥을 껐어요. 진행 상황은 보관됩니다.")
+                messages.emit(if (enabled) "자동 사냥을 시작합니다" else "자동 사냥을 멈췄습니다")
             }
         }
     }
@@ -176,7 +176,7 @@ class BossGraph(val context: Context) {
                     delay(1_500) // No combat calculation runs while the simulated car is driving.
                     fixture.park(distanceMeters = meters + (distanceKm.coerceIn(0.0, 100.0) * 1_000).toLong())
                     tick()
-                    messages.emit("복귀 정산과 필살의 일격이 적용됐어요. 주차 중 자동 사냥이 이어집니다.")
+                    messages.emit("이동 보상을 받았습니다")
                 }
             } finally {
                 fixture.park()

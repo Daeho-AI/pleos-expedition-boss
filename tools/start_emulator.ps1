@@ -42,6 +42,9 @@ $env:ANDROID_AVD_HOME = $avdHome
 $env:ANDROID_HOME = $s.androidSdk
 $env:ANDROID_SDK_ROOT = $s.androidSdk
 $arguments = @('-avd','PleosBoss','-no-snapshot','-no-audio','-port','5554','-gpu',$GpuMode)
+# The game uses Compose/OpenGL. Keep Vulkan disabled to avoid emulator 37.2.13
+# native crashes observed on this Windows/Intel machine. No OS settings change.
+$arguments += @('-feature','-Vulkan','-no-metrics')
 # Explicit DNS applies only to this emulator; Windows network settings are unchanged.
 if ($DnsServers) { $arguments += @('-dns-server', $DnsServers) }
 if (-not $Visible) { $arguments += @('-no-window','-no-boot-anim') }

@@ -21,7 +21,7 @@ import kotlin.math.sin
             drawOval(Color.Black.copy(alpha=.25f),Offset(-140f,-6f),Size(280f,20f))
             pixelMonster(index,0f,10f)
         }
-        if(muted)drawRect(Night.copy(alpha=.7f))
+        if(muted)drawRect(Color(0xFF171A20).copy(alpha=.7f))
     }
 }
 @Composable fun ChestArt(color: Color, modifier: Modifier = Modifier) {
