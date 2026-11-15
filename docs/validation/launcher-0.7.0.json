@@ -1,0 +1,25 @@
+{
+  "version": "0.7.0-fixture",
+  "launch": "tools/run_demo.ps1 -Mode fixture; default GPU mode, Vulkan disabled; cold boot",
+  "game": {
+    "visible": true,
+    "mode": "multi-window",
+    "bounds": [
+      853,
+      90,
+      2535,
+      1300
+    ]
+  },
+  "vehicle": {
+    "visible": true,
+    "mode": "multi-window",
+    "bounds": [
+      0,
+      0,
+      853,
+      1300
+    ]
+  },
+  "overlap": false
+}

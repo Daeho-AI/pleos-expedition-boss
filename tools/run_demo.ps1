@@ -113,6 +113,18 @@ try {
     Write-Host '기기가 준비됐습니다. 게임을 열고 있습니다...'
     $install = Invoke-BossAdb -AdbArguments @('-s','emulator-5554','install','-r',$apk)
     if ($install.ExitCode -ne 0) { throw "게임을 설치하지 못했습니다.`n$($install.Text)" }
+    # sys.boot_completed can precede Pleos TaskView initialization. Launching in
+    # that gap creates an Android fullscreen task instead of a vehicle app slot.
+    Write-Host '차량 홈 화면을 준비하고 있습니다...'
+    $vehicleShellDeadline = (Get-Date).AddSeconds(120)
+    $vehicleShellPattern = '(?m)^\s*\*\s*Task\{[^\r\n]*A=\d+:ai\.umos\.drivingview\s+U=' + [regex]::Escape([string]$driverUser) + '\s'
+    $navigationShellPattern = '(?m)^\s*\*\s*Task\{[^\r\n]*A=\d+:ai\.umos\.maps\.android\.navigation\.app\s+U=' + [regex]::Escape([string]$driverUser) + '\s'
+    do {
+        $vehicleActivities = Invoke-BossAdb -AdbArguments @('-s','emulator-5554','shell','dumpsys','activity','activities')
+        if ($vehicleActivities.ExitCode -eq 0 -and $vehicleActivities.Text -match $vehicleShellPattern -and $vehicleActivities.Text -match $navigationShellPattern) { break }
+        if ((Get-Date) -ge $vehicleShellDeadline) { throw '차량 홈 화면이 아직 준비되지 않았습니다. 가상 기기의 홈 화면이 나온 뒤 demo.cmd를 다시 실행해 주세요.' }
+        Start-Sleep -Seconds 2
+    } while ($true)
     $package = if ($Mode -eq 'fixture') { 'dev.pleos.entry.boss.fixture' } else { 'dev.pleos.entry.boss' }
     # Pleos may retain a hidden TaskView for an installed app. Recreate only our
     # app task, preserving Room data, and confirm its activity is actually resumed.
@@ -124,10 +136,18 @@ try {
         if ($launch.ExitCode -ne 0 -or $launch.Text -match '(?m)^\s*(Error:|Exception|Failure)') {
             throw "게임 화면을 열지 못했습니다.`n$($launch.Text)"
         }
-        Start-Sleep -Seconds 2
-        $activities = Invoke-BossAdb -AdbArguments @('-s','emulator-5554','shell','dumpsys','activity','activities')
         $resumedPattern = 'topResumedActivity=.*' + [regex]::Escape($package) + '/'
-        if ($activities.ExitCode -eq 0 -and $activities.Text -match $resumedPattern) {
+        $slotPattern = '(?m)^\s*\*\s*Task\{[^\r\n]*A=\d+:' + [regex]::Escape($package) + '\s+U=' + [regex]::Escape([string]$driverUser) + '\s[^\r\n]*visible=true\s[^\r\n]*mode=multi-window\s'
+        $stableSamples = 0
+        # The boot-time navigation launch can briefly replace an already resumed
+        # app. Confirm the game remains visible in the vehicle slot for 10 sec.
+        for ($probe = 0; $probe -lt 5; $probe++) {
+            Start-Sleep -Seconds 2
+            $activities = Invoke-BossAdb -AdbArguments @('-s','emulator-5554','shell','dumpsys','activity','activities')
+            if ($activities.ExitCode -ne 0 -or $activities.Text -notmatch $resumedPattern -or $activities.Text -notmatch $slotPattern) { break }
+            $stableSamples++
+        }
+        if ($stableSamples -eq 5) {
             $inFront = $true
             break
         }
