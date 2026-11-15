@@ -1,0 +1,138 @@
+[
+  {
+    "start": 0,
+    "end": 8,
+    "title": "원정 보스 · 차 안에서 즐기는 방치형 RPG",
+    "context": "차 안의 일상",
+    "disclosure": "Pleos 공식 에뮬레이터 · 실제 앱",
+    "sources": [
+      {
+        "path": "flow-hub.png",
+        "fromSeconds": 0,
+        "seconds": 8
+      }
+    ]
+  },
+  {
+    "start": 8,
+    "end": 20,
+    "title": "출발하면 게임은 자동으로 멈춥니다",
+    "context": "주행 시작",
+    "disclosure": "SDK 앱 · 가상 차량 신호",
+    "sources": [
+      {
+        "path": "vehicle-transition.mp4",
+        "fromSeconds": 7,
+        "seconds": 12
+      }
+    ]
+  },
+  {
+    "start": 20,
+    "end": 29,
+    "title": "주차 후 돌아오면 멈췄던 원정이 이어집니다",
+    "context": "주차 후 복귀",
+    "disclosure": "SDK 앱 · P 기어 확인",
+    "sources": [
+      {
+        "path": "vehicle-transition.mp4",
+        "fromSeconds": 26,
+        "seconds": 9
+      }
+    ]
+  },
+  {
+    "start": 29,
+    "end": 41,
+    "title": "달린 거리만큼 필살의 일격이 강해집니다",
+    "context": "주행거리 보너스",
+    "disclosure": "10 km 가상 입력 · 실제 보상 로직",
+    "sources": [
+      {
+        "path": "journey.mp4",
+        "fromSeconds": 3.5,
+        "seconds": 2.3
+      },
+      {
+        "path": "return-settled.png",
+        "fromSeconds": 0,
+        "seconds": 9.7
+      }
+    ]
+  },
+  {
+    "start": 41,
+    "end": 52,
+    "title": "충전하며 기다릴 때, 자동 사냥을 즐기세요",
+    "context": "충전·대기 시간",
+    "disclosure": "주차 후 앱을 이용하는 장면",
+    "sources": [
+      {
+        "path": "flow.mp4",
+        "fromSeconds": 12,
+        "seconds": 11
+      }
+    ]
+  },
+  {
+    "start": 52,
+    "end": 64,
+    "title": "보상을 열고 장비와 성장 재료를 모읍니다",
+    "context": "보상 확인",
+    "disclosure": "실제 상자 개봉",
+    "sources": [
+      {
+        "path": "flow.mp4",
+        "fromSeconds": 42.5,
+        "seconds": 12
+      }
+    ]
+  },
+  {
+    "start": 64,
+    "end": 74,
+    "title": "장비를 강화하며 나만의 캐릭터를 키웁니다",
+    "context": "캐릭터 성장",
+    "disclosure": "실제 강화 · 공격력 49 → 50",
+    "sources": [
+      {
+        "path": "gear.mp4",
+        "fromSeconds": 0,
+        "seconds": 8
+      },
+      {
+        "path": "gear-upgraded.png",
+        "fromSeconds": 0,
+        "seconds": 2
+      }
+    ]
+  },
+  {
+    "start": 74,
+    "end": 82,
+    "title": "필요한 장비는 친구와 교환합니다",
+    "context": "함께 즐기기",
+    "disclosure": "PC 서버 연결 · 시연 계정의 교환 기록",
+    "sources": [
+      {
+        "path": "friends.png",
+        "fromSeconds": 0,
+        "seconds": 8
+      }
+    ]
+  },
+  {
+    "start": 82,
+    "end": 90,
+    "title": "운전은 편하게, 기다림은 즐겁게",
+    "context": "원정 보스 · PLEOS",
+    "disclosure": "주행 중 중단 · 주차 후 성장",
+    "sources": [
+      {
+        "path": "return-settled.png",
+        "fromSeconds": 0,
+        "seconds": 8
+      }
+    ]
+  }
+]

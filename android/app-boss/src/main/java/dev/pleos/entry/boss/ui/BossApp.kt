@@ -67,7 +67,11 @@ private val tabs=listOf(Tab("home","원정",Icons.Default.Explore),Tab("chests",
         value=SystemClock.elapsedRealtime()
         while(foreground&&gateway.ux==UxMode.PARKED_INTERACTIVE){delay(500);value=SystemClock.elapsedRealtime()}
     }
-    val ux=if(BuildConfig.IS_FIXTURE)gateway.ux else gateway.input(now).ux
+    // A fresh SDK event can arrive between the 500 ms UI clock ticks. Comparing
+    // its timestamp with the older UI tick made a valid parked state look like
+    // a future sample and repeatedly destroyed the battle/intro composition.
+    // Keep the periodic stale-data check, but evaluate against current time.
+    val ux=if(BuildConfig.IS_FIXTURE)gateway.ux else gateway.input(maxOf(now,SystemClock.elapsedRealtime())).ux
     LaunchedEffect(graph,ux,foreground){
         if(foreground&&ux==UxMode.PARKED_INTERACTIVE)graph.messages.collect{snackbar.showSnackbar(it)}
         else snackbar.currentSnackbarData?.dismiss()
